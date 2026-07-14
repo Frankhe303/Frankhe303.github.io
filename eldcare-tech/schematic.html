@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EldCare · 硬件原理图</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#06080f;--c:rgba(12,20,35,.85);--l:rgba(0,180,255,.12);--cy:#00d4ff;--cyd:rgba(0,212,255,.6);--cya:rgba(0,212,255,.1);--bl:#0088ff;--pu:#7c3aed;--gr:#10b981;--am:#f59e0b;--re:#ef4444;--pi:#ec4899;--t:#e2e8f0;--td:#94a3b8;--tm:#64748b;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace}
+body{font-family:var(--sans);background:var(--bg);color:var(--t);line-height:1.7;overflow-x:hidden}
+.bg{position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,.02)1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.02)1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--cya);border-radius:2px}
+
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;padding:.7rem 2rem;background:linear-gradient(180deg,rgba(6,8,15,.95)0%,transparent 100%);display:flex;justify-content:space-between;align-items:center}
+.topbar .back{color:var(--cyd);text-decoration:none;font-size:.8rem}
+.topbar .back:hover{color:var(--cy)}
+.topbar .title{font-size:.85rem;font-weight:600;background:linear-gradient(135deg,var(--cy),var(--bl));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.hero{z-index:1;padding:6rem 2rem 2rem;max-width:1000px;margin:0 auto;text-align:center}
+.hero .tag{display:inline-block;font-size:.65rem;letter-spacing:.15em;color:var(--cyd);padding:.2rem .9rem;border:1px solid var(--cya);border-radius:100px;margin-bottom:.8rem}
+.hero h1{font-size:clamp(1.6rem,3vw,2.5rem);font-weight:700;background:linear-gradient(135deg,#fff 0%,var(--cy) 40%,var(--am) 60%,var(--pu) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--td);font-size:.9rem;font-weight:300}
+
+.sec{z-index:1;max-width:1200px;margin:0 auto;padding:0 2rem 3rem}
+.sec h2{font-size:1.15rem;font-weight:600;margin-bottom:1.2rem;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:.6rem}
+.sec h2 .num{font-size:.6rem;padding:.15rem .5rem;border-radius:100px;background:rgba(245,158,11,.12);color:var(--am);border:1px solid rgba(245,158,11,.2);font-family:var(--mono)}
+.sec .desc{color:var(--td);font-size:.82rem;margin-bottom:1rem;line-height:1.8}
+
+.sch{background:var(--c);border:1px solid var(--l);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;overflow-x:auto}
+.sch .sl{font-size:.68rem;color:var(--tm);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;text-align:center;font-family:var(--mono)}
+
+.row{display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:1rem}
+.col{flex:1;min-width:280px}
+.col h3{font-size:.9rem;font-weight:600;margin-bottom:.6rem;color:var(--cy)}
+.col .pin-table{font-family:var(--mono);font-size:.7rem;width:100%;border-collapse:collapse}
+.col .pin-table th{padding:.3rem .5rem;color:var(--tm);font-size:.6rem;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.05);text-align:left}
+.col .pin-table td{padding:.3rem .5rem;color:var(--td);border-bottom:1px solid rgba(255,255,255,.02)}
+.col .pin-table tr:hover td{color:var(--t);background:var(--cya)}
+.col .pin-table .sig{color:var(--cy)}
+.col .pin-table .pwr{color:var(--re)}
+.col .pin-table .gnd{color:var(--am)}
+.col .pin-table .nc{color:var(--tm)}
+
+.foot{z-index:1;text-align:center;padding:2rem;color:var(--tm);font-size:.7rem;border-top:1px solid rgba(255,255,255,.03)}
+
+@media(max-width:768px){.hero{padding:5rem 1rem 2rem}.sec{padding:0 1rem 2rem}}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+
+<div class="topbar">
+  <a class="back" href="hw-sw.html">&#8592; 返回设计总览</a>
+  <div class="title">硬件原理图 · 管脚级连接</div>
+</div>
+
+<div class="hero">
+  <div class="tag">&#128296; Reference Schematic</div>
+  <h1>硬件原理图设计稿</h1>
+  <p>可打板级原理图 · 管脚对接 · 去耦电容 · 供电方案 · BOM参考编号</p>
+</div>
+
+<div class="sec">
+  <h2><span class="num">SCH.1</span> 主原理图 · ESP32-S3 核心电路</h2>
+  <div class="desc">
+    MCU: ESP32-S3-WROOM-1 — 内置 Xtensa LX7 双核、PSRAM 8MB、WiFi/BLE、NPU向量扩展。<br>
+    参考手册: ESP32-S3-WROOM-1 Datasheet v1.7 · 引脚功能表从模块引脚41-56引出关键信号。
+  </div>
+
+  <!-- SVG Schematic for ESP32-S3 -->
+  <div class="sch">
+    <div class="sl">ESP32-S3-WROOM-1 · 核心MCU单元</div>
+    <svg viewBox="0 0 1200 550" style="width:100%;height:auto;max-width:1200px;display:block;margin:0 auto">
+      <defs><lg id="bb"><stop offset="0" stop-color="rgba(0,212,255,.12)"/><stop offset="1" stop-color="rgba(0,212,255,.03)"/></lg>
+      <lg id="pb"><stop offset="0" stop-color="rgba(239,68,68,.08)"/><stop offset="1" stop-color="rgba(239,68,68,.02)"/></lg>
+      <lg id="gb"><stop offset="0" stop-color="rgba(245,158,11,.08)"/><stop offset="1" stop-color="rgba(245,158,11,.02)"/></lg></defs>
+      <!-- MCU Body -->
+      <rect x="300" y="20" width="600" height="520" rx="16" fill="url(#bb)" stroke="rgba(0,212,255,.3)" stroke-width="2"/>
+      <text x="600" y="48" text-anchor="middle" fill="#00d4ff" font-size="15" font-weight="700">ESP32-S3-WROOM-1U</text>
+      <text x="600" y="65" text-anchor="middle" fill="#64748b" font-size="9" font-family="var(--mono)">Xtensa LX7 Dual @240MHz · 8MB Octal PSRAM · 16MB QSPI Flash · IEEE 802.11 b/g/n</text>
+      <!-- Pin rows -->
+      <text x="295" y="88" fill="#64748b" font-size="8" text-anchor="end" font-family="var(--mono)">J1 LEFT</text>
+      <text x="905" y="88" fill="#64748b" font-size="8" text-anchor="start" font-family="var(--mono)">J1 RIGHT</text>
+
+      <g font-family="var(--mono)" font-size="7">
+        <!-- Left pins -->
+        <text x="296" y="105" fill="#64748b" text-anchor="end">1</text><rect x="300" y="98" width="80" height="12" rx="2" fill="rgba(239,68,68,.1)"/><text x="305" y="107" fill="#ef4444">3V3</text>
+        <text x="296" y="120" fill="#64748b" text-anchor="end">2</text><rect x="300" y="113" width="80" height="12" rx="2" fill="rgba(0,212,255,.1)"/><text x="305" y="122" fill="#00d4ff">EN</text>
+        <text x="296" y="135" fill="#64748b" text-anchor="end">3</text><text x="305" y="137" fill="#94a3b8">IO0</text><text x="355" y="137" fill="#64748b">&#8250; BOOT_SEL(R=10k P-D)</text>
+        <text x="296" y="150" fill="#64748b" text-anchor="end">4</text><text x="305" y="152" fill="#94a3b8">IO1</text><text x="355" y="152" fill="#00d4ff">&#8250; RADAR_RST</text>
+        <text x="296" y="165" fill="#64748b" text-anchor="end">5</text><text x="305" y="167" fill="#94a3b8">IO2</text><text x="355" y="167" fill="#00d4ff">&#8250; RADAR_INT</text>
+        <text x="296" y="180" fill="#64748b" text-anchor="end">6</text><text x="305" y="182" fill="#94a3b8">IO3</text>
+        <text x="296" y="195" fill="#64748b" text-anchor="end">7</text><text x="305" y="197" fill="#94a3b8">IO4</text><text x="355" y="197" fill="#00d4ff">&#8250; RGB_LED</text>
+        <text x="296" y="210" fill="#64748b" text-anchor="end">8</text><text x="305" y="212" fill="#94a3b8">IO5</text>
+        <text x="296" y="225" fill="#64748b" text-anchor="end">9</text><text x="305" y="227" fill="#94a3b8">IO6</text><text x="355" y="227" fill="#00d4ff">&#8250; SPI_MISO (Radar)</text>
+        <text x="296" y="240" fill="#64748b" text-anchor="end">10</text><text x="305" y="242" fill="#94a3b8">IO7</text><text x="355" y="242" fill="#00d4ff">&#8250; SPI_MOSI (Radar)</text>
+        <text x="296" y="255" fill="#64748b" text-anchor="end">11</text><text x="305" y="257" fill="#94a3b8">IO8</text><text x="355" y="257" fill="#00d4ff">&#8250; SPI_SCLK (Radar)</text>
+        <text x="296" y="270" fill="#64748b" text-anchor="end">12</text><text x="305" y="272" fill="#94a3b8">IO9</text><text x="355" y="272" fill="#00d4ff">&#8250; SPI_CS (Radar)</text>
+        <text x="296" y="285" fill="#64748b" text-anchor="end">13</text><text x="305" y="287" fill="#00d4ff">TX</text><text x="355" y="287" fill="#64748b">&#8250; DEBUG_UART_TX</text>
+        <text x="296" y="300" fill="#64748b" text-anchor="end">14</text><text x="305" y="302" fill="#00d4ff">RX</text><text x="355" y="302" fill="#64748b">&#8250; DEBUG_UART_RX</text>
+        <text x="296" y="315" fill="#64748b" text-anchor="end">15</text><text x="305" y="317" fill="#00d4ff">U0TXD</text><text x="355" y="317" fill="#64748b">&#8250; 4G_MODULE_RX</text>
+        <text x="296" y="330" fill="#64748b" text-anchor="end">16</text><text x="305" y="332" fill="#00d4ff">U0RXD</text><text x="355" y="332" fill="#64748b">&#8250; 4G_MODULE_TX</text>
+        <text x="296" y="345" fill="#64748b" text-anchor="end">17</text><text x="305" y="347" fill="#94a3b8">IO10</text>
+        <text x="296" y="360" fill="#64748b" text-anchor="end">18</text><text x="305" y="362" fill="#94a3b8">IO11</text>
+        <text x="296" y="375" fill="#64748b" text-anchor="end">19</text><text x="305" y="377" fill="#94a3b8">IO12</text>
+        <text x="296" y="390" fill="#64748b" text-anchor="end">20</text><text x="305" y="392" fill="#94a3b8">IO13</text>
+        <text x="296" y="405" fill="#64748b" text-anchor="end">21</text><text x="305" y="407" fill="#94a3b8">IO14</text>
+        <g transform="translate(0, 15)">
+        <text x="296" y="415" fill="#64748b" text-anchor="end">22</text><text x="305" y="417" fill="#94a3b8">IO15</text>
+        <text x="296" y="430" fill="#64748b" text-anchor="end">23</text><text x="305" y="432" fill="#94a3b8">IO16</text>
+        <text x="296" y="445" fill="#64748b" text-anchor="end">24</text><text x="305" y="447" fill="#94a3b8">IO17</text><text x="355" y="447" fill="#00d4ff">&#8250; BUZZER</text>
+        <text x="296" y="460" fill="#64748b" text-anchor="end">25</text><text x="305" y="462" fill="#94a3b8">IO18</text>
+        <text x="296" y="475" fill="#64748b" text-anchor="end">26</text><text x="305" y="477" fill="#94a3b8">IO19</text>
+        <text x="296" y="490" fill="#64748b" text-anchor="end">27</text><text x="305" y="492" fill="#94a3b8">IO20</text>
+        <text x="296" y="505" fill="#64748b" text-anchor="end">28</text><text x="305" y="507" fill="#ef4444">GND</text>
+        </g>
+        <!-- Right pins -->
+        <g transform="translate(900, 105)">
+        <text x="4" y="0" fill="#94a3b8">29</text><text x="24" y="0" fill="#ef4444">3V3</text>
+        <text x="4" y="15" fill="#94a3b8">30</text><text x="24" y="15" fill="#ef4444">GND</text>
+        <text x="4" y="30" fill="#94a3b8">31</text><text x="24" y="30" fill="#94a3b8">IO21</text>
+        <text x="4" y="45" fill="#94a3b8">32</text><text x="24" y="45" fill="#94a3b8">IO35</text>
+        <text x="4" y="60" fill="#94a3b8">33</text><text x="24" y="60" fill="#94a3b8">IO36</text>
+        <text x="4" y="75" fill="#94a3b8">34</text><text x="24" y="75" fill="#94a3b8">IO37</text>
+        <text x="4" y="90" fill="#94a3b8">35</text><text x="24" y="90" fill="#00d4ff">IO38</text><text x="100" y="90" fill="#64748b">4G_PWR_EN</text>
+        <text x="4" y="105" fill="#94a3b8">36</text><text x="24" y="105" fill="#00d4ff">IO39</text><text x="100" y="105" fill="#64748b">4G_RESET</text>
+        <text x="4" y="120" fill="#94a3b8">37</text><text x="24" y="120" fill="#00d4ff">IO40</text><text x="100" y="120" fill="#64748b">4G_STATUS</text>
+        <text x="4" y="135" fill="#94a3b8">38</text><text x="24" y="135" fill="#94a3b8">IO41</text>
+        <text x="4" y="150" fill="#94a3b8">39</text><text x="24" y="150" fill="#94a3b8">IO42</text>
+        <text x="4" y="165" fill="#94a3b8">40</text><text x="24" y="165" fill="#00d4ff">U0RTS</text><text x="100" y="165" fill="#64748b">4G_FLOW_CTRL</text>
+        <text x="4" y="180" fill="#94a3b8">41</text><text x="24" y="180" fill="#00d4ff">U0CTS</text><text x="100" y="180" fill="#64748b">4G_FLOW_CTRL</text>
+        <text x="4" y="195" fill="#94a3b8">42</text><text x="24" y="195" fill="#94a3b8">IO43</text>
+        <text x="4" y="210" fill="#94a3b8">43</text><text x="24" y="210" fill="#94a3b8">IO44</text>
+        <text x="4" y="225" fill="#94a3b8">44</text><text x="24" y="225" fill="#94a3b8">IO45</text>
+        <text x="4" y="240" fill="#94a3b8">45</text><text x="24" y="240" fill="#94a3b8">IO46</text>
+        <text x="4" y="255" fill="#94a3b8">46</text><text x="24" y="255" fill="#00d4ff">IO47</text><text x="100" y="255" fill="#64748b">SDA (I2C)</text>
+        <text x="4" y="270" fill="#94a3b8">47</text><text x="24" y="270" fill="#00d4ff">IO48</text><text x="100" y="270" fill="#64748b">SCL (I2C)</text>
+        <text x="4" y="285" fill="#94a3b8">48</text><text x="24" y="285" fill="#94a3b8">IO9</text>
+        <text x="4" y="300" fill="#94a3b8">49</text><text x="24" y="300" fill="#94a3b8">IO10</text>
+        <text x="4" y="315" fill="#94a3b8">50</text><text x="24" y="315" fill="#94a3b8">IO11</text>
+        <text x="4" y="330" fill="#94a3b8">51</text><text x="24" y="330" fill="#94a3b8">IO12</text>
+        <text x="4" y="345" fill="#94a3b8">52</text><text x="24" y="345" fill="#94a3b8">IO13</text>
+        <text x="4" y="360" fill="#94a3b8">53</text><text x="24" y="360" fill="#94a3b8">IO14</text>
+        <text x="4" y="375" fill="#94a3b8">54</text><text x="24" y="375" fill="#ef4444">3V3</text>
+        <text x="4" y="390" fill="#94a3b8">55</text><text x="24" y="390" fill="#ef4444">GND</text>
+        <text x="4" y="405" fill="#94a3b8">56</text><text x="24" y="405" fill="#ef4444">GND</text>
+        </g>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<div class="sec">
+  <h2><span class="num">SCH.2</span> 电源方案</h2>
+  <div class="desc">
+    输入: USB-C 5V/2A 或 POE 48V→5V。主电源轨: 3.3V (MCU, Radar, Flash, LED) / 1.8V (Radar Core) / 1.1V (可选 MCU Core 降压模式)。
+  </div>
+  <div class="sch">
+    <div class="sl">POWER TREE · 电源拓扑</div>
+    <svg viewBox="0 0 1000 200" style="width:100%;height:auto;max-width:1000px;display:block;margin:0 auto">
+      <rect x="20" y="60" width="140" height="60" rx="12" fill="rgba(239,68,68,.08)" stroke="rgba(239,68,68,.2)"/>
+      <text x="90" y="86" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="600">VBUS 5V</text><text x="90" y="104" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">USB-C / POE 模块</text>
+      <text x="170" y="93" fill="#64748b" font-size="16">&#8594;</text>
+      <rect x="190" y="55" width="120" height="70" rx="10" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.2)"/>
+      <text x="250" y="80" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="600">AMS1117-3.3</text><text x="250" y="96" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">LDO SOT-223</text><text x="250" y="112" text-anchor="middle" fill="#64748b" font-size="6">Cin 10uF | Cout 22uF</text>
+      <text x="320" y="93" fill="#64748b" font-size="16">&#8594;</text>
+      <rect x="340" y="60" width="160" height="60" rx="12" fill="rgba(16,185,129,.08)" stroke="rgba(16,185,129,.2)"/>
+      <text x="420" y="86" text-anchor="middle" fill="#10b981" font-size="11" font-weight="600">VDD_3V3 Rail</text><text x="420" y="104" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">MCU · Radar · Flash · LED · 4G</text>
+      <text x="510" y="93" fill="#64748b" font-size="16">&#8594;</text>
+      <rect x="530" y="55" width="120" height="70" rx="10" fill="rgba(124,58,237,.08)" stroke="rgba(124,58,237,.2)"/>
+      <text x="590" y="80" text-anchor="middle" fill="#a78bfa" font-size="10" font-weight="600">AP2112K-1.8</text><text x="590" y="96" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">LDO SOT-23-5</text><text x="590" y="112" text-anchor="middle" fill="#64748b" font-size="6">Radar Core供电</text>
+      <text x="660" y="93" fill="#64748b" font-size="16">&#8594;</text>
+      <rect x="680" y="60" width="140" height="60" rx="12" fill="rgba(124,58,237,.05)" stroke="rgba(124,58,237,.15)"/>
+      <text x="750" y="86" text-anchor="middle" fill="#a78bfa" font-size="10" font-weight="600">VDD_1V8 Radar</text>
+      <text x="170" y="145" fill="#64748b" font-size="16">&#8595;</text>
+      <text x="180" y="160" fill="#64748b" font-size="7" font-family="var(--mono)">去耦: 每IC 100nF x2 + 10uF x1</text>
+    </svg>
+    <div class="row" style="margin-top:1rem">
+      <div class="col"><h3>Power Budget</h3>
+      <table class="pin-table"><tr><th>Rail</th><th>供电对象</th><th>峰值电流</th><th>备注</th></tr>
+      <tr><td class="pwr">5V</td><td>USB/POE输入</td><td>500mA</td><td>含全部负载</td></tr>
+      <tr><td class="pwr">3.3V</td><td>MCU+Radar IO</td><td>350mA</td><td>AMS1117 LDO</td></tr>
+      <tr><td class="pwr">1.8V</td><td>Radar Core</td><td>200mA</td><td>AP2112K LDO</td></tr>
+      <tr><td class="pwr">3.3V_RF</td><td>Radar TX/RX</td><td>100mA</td><td>LDO独立磁珠隔离</td></tr>
+      <tr><td colspan="2" style="color:var(--cy);font-weight:600">总计 1.3W</td><td>vs 1.5W预算</td><td>余量15%</td></tr>
+      </table></div>
+      <div class="col"><h3>去耦电容</h3>
+<pre style="color:var(--td);font-size:.72rem;font-family:var(--mono);line-height:1.8">
+ESP32-S3 pin 3V3:  100nF&#215;2 + 10uF&#215;1 (X7R 0603)
+ESP32-S3 pin EN:    100nF + 1uF delay RC (10k&#215;1uF)
+IWR6843 VDDA:      100nF&#215;4 + 10uF&#215;1 + 0.1uF&#215;2 (0201)
+IWR6843 VDDIN:     22uF&#215;1 (钽) + 100nF&#215;2
+Flash W25Q128:     100nF&#215;1 (0402)
+Air780E 4G:        470uF&#215;1 (钽/Low ESR) + 100nF&#215;2
+LED WS2812B:       100nF&#215;1 each
+Buzzer:            47uF&#215;1 (电解 抑制反电动势)
+</pre></div></div></div></div>
+
+<div class="sec">
+  <h2><span class="num">SCH.3</span> 雷达前端 · IWR6843 接口</h2>
+  <div class="desc">Radar Module: TI IWR6843AOP — 60GHz 3T4R MIMO + 内置天线 + AFE + DSP。与MCU通过SPI (Mode 0, 20MHz) 通信。</div>
+  <div class="sch"><div class="sl">IWR6843AOP · SPI接口详细连接</div>
+<svg viewBox="0 0 1000 280" style="width:100%;height:auto;max-width:1000px;display:block;margin:0 auto">
+<defs><lg id="rb"><stop offset="0" stop-color="rgba(245,158,11,.12)"/><stop offset="1" stop-color="rgba(245,158,11,.02)"/></lg></defs>
+<rect x="20" y="20" width="400" height="250" rx="14" fill="url(#rb)" stroke="rgba(245,158,11,.3)" stroke-width="2"/>
+<text x="220" y="50" text-anchor="middle" fill="#f59e0b" font-size="14" font-weight="700">Radar: IWR6843AOP</text>
+<text x="220" y="68" text-anchor="middle" fill="#64748b" font-size="8" font-family="var(--mono)">60GHz 3T4R · AFE+DSP · SPI Mode 0 20MHz</text>
+<g font-family="var(--mono)" font-size="7">
+<rect x="35" y="85" width="370" height="16" rx="3" fill="rgba(245,158,11,.08)"/><text x="45" y="96" fill="#f59e0b">SPI_CLK</text><text x="200" y="96" fill="#64748b">&#8596;</text><text x="260" y="96" fill="#94a3b8">ESP32-S3: IO8 GPIO_SCLK</text>
+<rect x="35" y="106" width="370" height="16" rx="3" fill="rgba(245,158,11,.08)"/><text x="45" y="117" fill="#f59e0b">SPI_MOSI</text><text x="200" y="117" fill="#64748b">&#8592;</text><text x="260" y="117" fill="#94a3b8">ESP32-S3: IO7 GPIO_MOSI</text>
+<rect x="35" y="127" width="370" height="16" rx="3" fill="rgba(245,158,11,.08)"/><text x="45" y="138" fill="#f59e0b">SPI_MISO</text><text x="200" y="138" fill="#64748b">&#8594;</text><text x="260" y="138" fill="#94a3b8">ESP32-S3: IO6 GPIO_MISO</text>
+<rect x="35" y="148" width="370" height="16" rx="3" fill="rgba(245,158,11,.08)"/><text x="45" y="159" fill="#f59e0b">SPI_CS</text><text x="200" y="159" fill="#64748b">&#8596;</text><text x="260" y="159" fill="#94a3b8">ESP32-S3: IO9 GPIO_CS</text>
+<rect x="35" y="169" width="370" height="16" rx="3" fill="rgba(245,158,11,.08)"/><text x="45" y="180" fill="#f59e0b">HOST_INT</text><text x="200" y="180" fill="#64748b">&#8594;</text><text x="260" y="180" fill="#94a3b8">ESP32-S3: IO2 GPIO_INT (100K P-U)</text>
+<rect x="35" y="190" width="370" height="16" rx="3" fill="rgba(245,158,11,.08)"/><text x="45" y="201" fill="#f59e0b">NRESET</text><text x="200" y="201" fill="#64748b">&#8592;</text><text x="260" y="201" fill="#94a3b8">ESP32-S3: IO1 GPIO_RST (100K P-U)</text>
+<rect x="35" y="211" width="370" height="16" rx="3" fill="rgba(239,68,68,.08)"/><text x="45" y="222" fill="#ef4444">VDDIN (3.3V)</text>  <text x="260" y="222" fill="#94a3b8">AMS1117-3.3 Rail</text>
+<rect x="35" y="232" width="370" height="16" rx="3" fill="rgba(124,58,237,.08)"/><text x="45" y="243" fill="#a78bfa">VDDA (1.8V)</text>   <text x="260" y="243" fill="#94a3b8">AP2112K-1.8 Rail</text>
+</g>
+
+<rect x="480" y="80" width="440" height="140" rx="10" fill="rgba(0,212,255,.05)" stroke="rgba(0,212,255,.12)"/>
+<text x="700" y="108" text-anchor="middle" fill="#00d4ff" font-size="10" font-weight="600">SPI Timing</text>
+<text x="700" y="130" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="var(--mono)">Mode 0 (CPOL=0, CPHA=0)</text>
+<text x="700" y="152" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="var(--mono)">SCLK = 20MHz (50ns period)</text>
+<text x="700" y="174" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="var(--mono)">每帧 40KB &#8594; SPI传输 16ms</text>
+<text x="700" y="196" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="var(--mono)">DMA缓冲: 2x 40KB Ping-Pong</text>
+</svg></div></div>
+
+<div class="sec">
+  <h2><span class="num">SCH.4</span> 4G 模块 &amp; 外围电路</h2>
+  <div class="sch"><div class="sl">Air780E Cat.1 Module · UART + Power Control</div>
+<svg viewBox="0 0 800 280" style="width:100%;height:auto;max-width:800px;display:block;margin:0 auto">
+<defs><lg id="mb"><stop offset="0" stop-color="rgba(124,58,237,.12)"/><stop offset="1" stop-color="rgba(124,58,237,.02)"/></lg></defs>
+<rect x="20" y="20" width="340" height="250" rx="14" fill="url(#mb)" stroke="rgba(124,58,237,.3)" stroke-width="2"/>
+<text x="190" y="50" text-anchor="middle" fill="#a78bfa" font-size="14" font-weight="700">4G Module: Air780E</text>
+<text x="190" y="68" text-anchor="middle" fill="#64748b" font-size="8" font-family="var(--mono)">LTE Cat.1 · UART 115200 · MQTT上行</text>
+<g font-family="var(--mono)" font-size="7">
+<rect x="30" y="85" width="320" height="14" rx="2" fill="rgba(124,58,237,.08)"/><text x="40" y="95" fill="#a78bfa">TXD</text><text x="160" y="95" fill="#64748b">&#8594;</text><text x="210" y="95" fill="#94a3b8">ESP32-S3: U0RXD (pin 16)</text>
+<rect x="30" y="104" width="320" height="14" rx="2" fill="rgba(124,58,237,.08)"/><text x="40" y="114" fill="#a78bfa">RXD</text><text x="160" y="114" fill="#64748b">&#8592;</text><text x="210" y="114" fill="#94a3b8">ESP32-S3: U0TXD (pin 15)</text>
+<rect x="30" y="123" width="320" height="14" rx="2" fill="rgba(124,58,237,.08)"/><text x="40" y="133" fill="#a78bfa">PWR_EN</text><text x="160" y="133" fill="#64748b">&#8592;</text><text x="210" y="133" fill="#94a3b8">ESP32-S3: IO38 (高有效)</text>
+<rect x="30" y="142" width="320" height="14" rx="2" fill="rgba(124,58,237,.08)"/><text x="40" y="152" fill="#a78bfa">RESET</text><text x="160" y="152" fill="#64748b">&#8592;</text><text x="210" y="152" fill="#94a3b8">ESP32-S3: IO39 (低有效 100ms)</text>
+<rect x="30" y="161" width="320" height="14" rx="2" fill="rgba(124,58,237,.08)"/><text x="40" y="171" fill="#a78bfa">STATUS</text><text x="160" y="171" fill="#64748b">&#8594;</text><text x="210" y="171" fill="#94a3b8">ESP32-S3: IO40 (高一注册成功)</text>
+<rect x="30" y="180" width="320" height="14" rx="2" fill="rgba(124,58,237,.08)"/><text x="40" y="190" fill="#a78bfa">V_BAT</text><text x="210" y="190" fill="#94a3b8">3.3V Rail (峰值2A需独立LDO)</text>
+<rect x="30" y="199" width="320" height="14" rx="2" fill="rgba(239,68,68,.06)"/><text x="40" y="209" fill="#ef4444">GND</text><text x="210" y="209" fill="#94a3b8">大面积接地 · 4G天线地平面</text>
+</g>
+
+<rect x="420" y="50" width="350" height="90" rx="10" fill="rgba(239,68,68,.05)" stroke="rgba(239,68,68,.12)"/>
+<text x="595" y="75" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="600">4G 电源注意事项</text>
+<text x="595" y="96" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-family="var(--mono)">&#8226; Air780E 发射瞬间峰值 2A@3.3V</text>
+<text x="595" y="114" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-family="var(--mono)">&#8226; 独立 LDO (ME6206A33M3G) 供电</text>
+<text x="595" y="132" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-family="var(--mono)">&#8226; 4G天线阻抗匹配 50 Ohm</text>
+</svg></div></div>
+
+<div class="sec">
+  <h2><span class="num">SCH.5</span> 外围电路 · LED / Buzzer / 按钮</h2>
+  <div class="sch"><div class="sl">指示 & 人机交互</div>
+<svg viewBox="0 0 900 220" style="width:100%;height:auto;max-width:900px;display:block;margin:0 auto">
+<rect x="20" y="15" width="260" height="100" rx="10" fill="rgba(0,212,255,.05)" stroke="rgba(0,212,255,.12)"/>
+<text x="150" y="40" text-anchor="middle" fill="#00d4ff" font-size="10" font-weight="600">STATUS LED</text>
+<text x="150" y="58" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="var(--mono)">WS2812B-2020 x3</text>
+<text x="150" y="75" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="var(--mono)">IO4 &#8592; MCU · VDD=3.3V</text>
+<text x="150" y="92" text-anchor="middle" fill="#64748b" font-size="6" font-family="var(--mono)">串联: DIN->DOUT · 100nF去耦each</text>
+
+<rect x="310" y="15" width="260" height="100" rx="10" fill="rgba(239,68,68,.05)" stroke="rgba(239,68,68,.12)"/>
+<text x="440" y="40" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="600">BUZZER</text>
+<text x="440" y="58" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="var(--mono)">无源蜂鸣器 3V 80dB</text>
+<text x="440" y="75" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="var(--mono)">IO17 &#8592; NPN (S8050) 驱动</text>
+<text x="440" y="92" text-anchor="middle" fill="#64748b" font-size="6" font-family="var(--mono)">反并二极管 1N4148 防反电动势</text>
+
+<rect x="600" y="15" width="260" height="100" rx="10" fill="rgba(16,185,129,.05)" stroke="rgba(16,185,129,.12)"/>
+<text x="730" y="40" text-anchor="middle" fill="#10b981" font-size="10" font-weight="600">BUTTON + UART</text>
+<text x="730" y="58" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="var(--mono)">RST_BTN: EN-GND · 10K P-U</text>
+<text x="730" y="75" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="var(--mono)">BOOT: IO0-GND · 10K P-U</text>
+<text x="730" y="92" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="var(--mono)">UART: TX/RX 引出 2.54排针</text>
+</svg></div></div>
+
+<div class="sec" style="margin-bottom:4rem">
+  <h2><span class="num">SCH.6</span> PCB Layout 约束 &amp; 下单参考</h2>
+  <div class="row">
+    <div class="col"><h3>Layout 约束</h3>
+<table class="pin-table"><tr><th>约束项</th><th>要求</th></tr>
+<tr><td>板厚</td><td>1.0mm 或 1.2mm</td></tr>
+<tr><td>层数</td><td>4层 (S-G-P-S)</td></tr>
+<tr><td>尺寸</td><td>86 x 86mm</td></tr>
+<tr><td>铜厚</td><td>1oz 内外</td></tr>
+<tr><td>最小线宽/距</td><td>5/5 mil</td></tr>
+<tr><td>最小孔径</td><td>0.3mm</td></tr>
+<tr><td>阻焊</td><td>黑色亚光</td></tr>
+<tr><td>丝印</td><td>白色</td></tr>
+<tr><td class="sig">RF走线</td><td>50 Ohm 共面波导, 不跨层</td></tr>
+<tr><td class="sig">SPI走线</td><td>等长 ±2mm, &lt;50mm</td></tr>
+<tr><td class="pwr">电源</td><td>3.3V via星型拓扑, 1.8V就近</td></tr>
+<tr><td class="gnd">接地</td><td>L2完整地平面, 多过孔stitching</td></tr>
+</table></div>
+<div class="col"><h3>PCB下单参数 (嘉立创)</h3>
+<pre style="color:var(--td);font-size:.72rem;font-family:var(--mono);line-height:1.9">
+板子类型: 4层板
+尺寸:      86 x 86 mm
+板厚:      1.0mm
+铜厚:      1oz (内外)
+板材:      FR4 TG150
+阻焊颜色:  黑色
+字符颜色:  白色
+表面处理:  HASL 无铅
+最小线宽:  5mil
+最小间距:  5mil
+最小孔径:  0.3mm
+过孔盖油:  是
+测试:      飞针测试
+数量:      5片 (打样) / 50片 (小批量)
+
+打样报价:  &#165;30-50 (5片 JLCPCB)
+小批量:    &#165;12-18/片 (50片)
+</pre></div>
+</div></div>
+
+<footer class="foot">
+  <p>EldCare 银发守护者 · <a href="hw-sw.html" style="color:var(--cyd);text-decoration:none">返回设计总览</a></p>
+  <p style="margin-top:.3rem;font-size:.6rem">硬件原理图 v1.0 · 可直接用于PCB Layout设计</p>
+</footer>
+</body>
+</html>
