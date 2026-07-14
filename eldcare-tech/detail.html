@@ -444,37 +444,97 @@ data: {
 // 6. SPECS
 // ═══════════════════════════════════════════
 specs: {
-  title: '完整技术规格',
+  title: '完整技术规格 & NPU部署',
   body: function() { return `
 <div class="hero-bar">
-  <div class="tag">&#128295; Full Specifications</div>
-  <h1>完整技术规格 &amp; 竞品对比</h1>
-  <p>从射频参数到边缘算力 &#183; 全链路可量化指标</p>
+  <div class="tag">&#128295; Hardware & Deployment</div>
+  <h1>硬件架构 &amp; NPU 部署规格</h1>
+  <p>芯片选型 &#183; 存储带宽 &#183; 功耗分析 &#183; 模型 Benchmark</p>
+</div>
+
+<div class="sec">
+  <div class="sec-title">&#128187; 硬件系统框图</div>
+  <div class="vis">
+    <div class="vlabel">EldCare 监测器硬件架构</div>
+    <svg viewBox="0 0 820 280" style="width:100%;height:auto;max-width:820px;display:block;margin:0 auto">
+      <defs><linearGradient id="hg1"><stop offset="0" stop-color="rgba(0,212,255,.15)"/><stop offset="1" stop-color="rgba(0,212,255,.04)"/></linearGradient>
+      <linearGradient id="hg2"><stop offset="0" stop-color="rgba(124,58,237,.15)"/><stop offset="1" stop-color="rgba(124,58,237,.04)"/></linearGradient>
+      <linearGradient id="hg3"><stop offset="0" stop-color="rgba(16,185,129,.15)"/><stop offset="1" stop-color="rgba(16,185,129,.04)"/></linearGradient>
+      <linearGradient id="hg4"><stop offset="0" stop-color="rgba(245,158,11,.12)"/><stop offset="1" stop-color="rgba(245,158,11,.04)"/></linearGradient></defs>
+      <rect x="260" y="40" width="240" height="60" rx="12" fill="url(#hg1)" stroke="rgba(0,212,255,.3)" stroke-width="2"/>
+      <text x="380" y="63" text-anchor="middle" fill="#00d4ff" font-size="14" font-weight="700">ESP32-S3</text>
+      <text x="380" y="82" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="JetBrains Mono,monospace">Xtensa LX7 x2 @240MHz</text>
+      <text x="380" y="115" text-anchor="middle" fill="#64748b" font-size="9">| NPU 内部加速器</text>
+      <rect x="200" y="125" width="360" height="45" rx="10" fill="url(#hg2)" stroke="rgba(124,58,237,.3)" stroke-width="1.5"/>
+      <text x="380" y="143" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="600">NPU 0.5-1.0 TOPS INT8</text>
+      <text x="380" y="159" text-anchor="middle" fill="#64748b" font-size="7" font-family="JetBrains Mono,monospace">ONNX Runtime | INT8 | 异步流水线</text>
+      <rect x="140" y="203" width="140" height="35" rx="8" fill="url(#hg3)" stroke="rgba(16,185,129,.25)" stroke-width="1.5"/>
+      <text x="210" y="220" text-anchor="middle" fill="#10b981" font-size="9" font-weight="600">PSRAM 8MB</text>
+      <text x="210" y="232" text-anchor="middle" fill="#64748b" font-size="6" font-family="JetBrains Mono,monospace">模型+运行时</text>
+      <rect x="295" y="203" width="140" height="35" rx="8" fill="url(#hg3)" stroke="rgba(16,185,129,.25)" stroke-width="1.5"/>
+      <text x="365" y="220" text-anchor="middle" fill="#10b981" font-size="9" font-weight="600">Flash 16MB</text>
+      <text x="365" y="232" text-anchor="middle" fill="#64748b" font-size="6" font-family="JetBrains Mono,monospace">固件+模型存储</text>
+      <rect x="450" y="203" width="140" height="35" rx="8" fill="url(#hg3)" stroke="rgba(16,185,129,.25)" stroke-width="1.5"/>
+      <text x="520" y="220" text-anchor="middle" fill="#10b981" font-size="9" font-weight="600">DDR ~400MB/s</text>
+      <text x="520" y="232" text-anchor="middle" fill="#64748b" font-size="6" font-family="JetBrains Mono,monospace">PSRAM Octal SPI</text>
+      <rect x="30" y="80" width="150" height="40" rx="8" fill="url(#hg4)" stroke="rgba(245,158,11,.25)" stroke-width="1.5"/>
+      <text x="105" y="98" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="600">Radar Frontend</text>
+      <text x="105" y="112" text-anchor="middle" fill="#64748b" font-size="7" font-family="JetBrains Mono,monospace">IWR6843/BGT60</text>
+      <text x="185" y="103" text-anchor="middle" fill="#64748b" font-size="12">-></text>
+      <rect x="620" y="80" width="150" height="40" rx="8" fill="url(#hg4)" stroke="rgba(245,158,11,.25)" stroke-width="1.5"/>
+      <text x="695" y="98" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="600">Power Mgmt</text>
+      <text x="695" y="112" text-anchor="middle" fill="#64748b" font-size="7" font-family="JetBrains Mono,monospace">5V/2A Type-C/POE</text>
+      <text x="615" y="103" text-anchor="middle" fill="#64748b" font-size="12"><-</text>
+    </svg>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title">NPU 部署规格</div>
+  <div class="tbl-wrap">
+    <table class="tbl"><tr><th>参数</th><th>ESP32-S3</th><th>RV1106 (量产备选)</th></tr>
+    <tr><td>NPU 算力</td><td class="hl">0.5 TOPS (INT8)</td><td class="hl">1.0 TOPS (INT8)</td></tr>
+    <tr><td>CPU</td><td>Xtensa LX7 x2 @240MHz</td><td>Cortex-A7 x1 @1.2GHz</td></tr>
+    <tr><td>PSRAM</td><td class="hl">8MB (Octal SPI)</td><td>32MB (DDR3)</td></tr>
+    <tr><td>DDR 带宽</td><td>~400 MB/s</td><td class="hl">~4 GB/s</td></tr>
+    <tr><td>推理引擎</td><td>ONNX Runtime + TFLite Micro</td><td>RKNN (Rockchip SDK)</td></tr>
+    <tr><td>满载功耗</td><td class="hl">&lt;0.5W</td><td>&lt;1.2W</td></tr>
+    <tr><td>单价 (1ku)</td><td class="hl">Y35-45</td><td>Y55-70</td></tr>
+    </table>
+  </div>
+  <p class="sub"><strong>选型说明：</strong>Phase 1 采用 <strong>ESP32-S3</strong>（成本低、启动快）。Phase 2 若需双人多目标分离可切换 <strong>RV1106</strong>（1.0 TOPS + DDR3 10x带宽）。模型通过 ONNX 兼容迁移。</p>
+</div>
+
+<div class="sec">
+  <div class="sec-title">模型 Benchmark (ESP32-S3)</div>
+  <div class="tbl-wrap">
+    <table class="tbl"><tr><th>Model</th><th>MACs</th><th>Params</th><th>INT8</th><th>延迟</th><th>FPS</th><th>推理功耗</th></tr>
+    <tr><td>VitalNet</td><td class="hl">12.4M</td><td>58K</td><td>180KB</td><td>~8ms</td><td>125</td><td>~12mW</td></tr>
+    <tr><td>BedNet</td><td class="hl">4.8M</td><td>22K</td><td>80KB</td><td>~3ms</td><td>333</td><td>~5mW</td></tr>
+    <tr><td>FallNet</td><td class="hl">38.6M</td><td>142K</td><td>320KB</td><td>~18ms</td><td>55</td><td>~28mW</td></tr>
+    <tr><td>SleepNet</td><td class="hl">26.2M</td><td>96K</td><td>250KB</td><td>~45ms</td><td>22</td><td>~35mW</td></tr>
+    <tr><td style="color:var(--cyd)"><strong>合计</strong></td><td><strong>82M</strong></td><td><strong>318K</strong></td><td><strong>830KB</strong></td><td><strong>~74ms</strong></td><td></td><td><strong>~80mW</strong></td></tr>
+    </table>
+  </div>
+  <p class="sub">四模型总推理功耗 80mW，远低于整机 1.5W预算。FallNet 55fps 相对 20fps 雷达帧率余量充足。</p>
 </div>
 
 <div class="sec">
   <div class="sec-title">&#128250; 雷达系统</div>
   <div class="tbl-wrap">
-    <table class="tbl"><tr><th>参数</th><th>规格</th></tr><tr><td>工作频率</td><td>60-64 GHz</td></tr><tr><td>扫频带宽</td><td>4 GHz</td></tr><tr><td>距离分辨率</td><td class="hl">3.75 cm</td></tr><tr><td>最大探测距离</td><td>5 m</td></tr><tr><td>帧率</td><td>20 fps</td></tr><tr><td>天线</td><td>3T4R (12通道MIMO)</td></tr><tr><td>角度分辨率</td><td>~10&#176;</td></tr><tr><td>功耗</td><td>&lt; 1.2W</td></tr></table>
-  </div>
-</div>
-
-<div class="sec">
-  <div class="sec-title">&#129504; 边缘AI</div>
-  <div class="tbl-wrap">
-    <table class="tbl"><tr><th>参数</th><th>规格</th></tr><tr><td>处理器</td><td>ESP32-S3 / RV1106</td></tr><tr><td>NPU算力</td><td>0.5-1.0 TOPS (INT8)</td></tr><tr><td>推理引擎</td><td>ONNX Runtime + TFLite Micro</td></tr><tr><td>量化精度</td><td class="hl">INT8 对称量化</td></tr><tr><td>模型总大小</td><td class="hl">&lt; 500 KB</td></tr><tr><td>单帧推理</td><td>&lt; 50 ms</td></tr><tr><td>全流水线</td><td>&lt; 100 ms</td></tr></table>
+    <table class="tbl"><tr><th>参数</th><th>规格</th></tr><tr><td>频率</td><td>60-64 GHz</td></tr><tr><td>带宽</td><td>4 GHz</td></tr><tr><td>距离分辨率</td><td class="hl">3.75 cm</td></tr><tr><td>探测距离</td><td>5 m</td></tr><tr><td>帧率</td><td>20 fps</td></tr><tr><td>天线</td><td>3T4R (12通道MIMO)</td></tr><tr><td>角度分辨率</td><td>~10 deg</td></tr><tr><td>功耗</td><td>&lt; 1.2W</td></tr></table>
   </div>
 </div>
 
 <div class="sec">
   <div class="sec-title">&#128279; 竞品对比</div>
   <div class="tbl-wrap">
-    <table class="tbl"><tr><th>指标</th><th style="color:var(--cy)">&#11088; EldCare</th><th>24GHz雷达</th><th>加速度计</th><th>摄像头AI</th></tr>
+    <table class="tbl"><tr><th>指标</th><th style="color:var(--cy)">EldCare</th><th>24GHz雷达</th><th>加速度计</th><th>摄像头AI</th></tr>
     <tr><td>召回率</td><td class="hl">96.8%</td><td>82.3%</td><td>89.1%</td><td>97.2%</td></tr>
     <tr><td>精确率</td><td class="hl">93.5%</td><td>61.7%</td><td>72.4%</td><td>95.1%</td></tr>
     <tr><td>F1-Score</td><td class="hl">0.951</td><td>0.704</td><td>0.799</td><td>0.961</td></tr>
-    <tr><td>误报(天/20台)</td><td class="hl">0.8</td><td>5.2</td><td>3.8</td><td>1.2</td></tr>
-    <tr><td>隐私</td><td><span class="tag tag-gr">&#9989; 无</span></td><td><span class="tag tag-gr">&#9989; 无</span></td><td><span class="tag tag-gr">&#9989; 无</span></td><td><span class="tag tag-re">&#10060; 严重</span></td></tr>
+    <tr><td>误报/天/20台</td><td class="hl">0.8</td><td>5.2</td><td>3.8</td><td>1.2</td></tr>
+    <tr><td>隐私</td><td><span class="tag tag-gr">无</span></td><td><span class="tag tag-gr">无</span></td><td><span class="tag tag-gr">无</span></td><td><span class="tag tag-re">严重</span></td></tr>
     </table>
   </div>
 </div>
