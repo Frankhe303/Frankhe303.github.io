@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EldCare · 银发守护者 — 技术白皮书</title>
+<style>
+/* ══════════════════════════════════════════════
+   GLOBAL RESET & FONTS
+   ══════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg-deep: #06080f;
+  --bg-card: rgba(12, 20, 35, 0.85);
+  --bg-card-hover: rgba(18, 30, 50, 0.95);
+  --border-glow: rgba(0, 180, 255, 0.15);
+  --border-active: rgba(0, 212, 255, 0.5);
+  --cyan: #00d4ff;
+  --cyan-dim: rgba(0, 212, 255, 0.6);
+  --cyan-muted: rgba(0, 212, 255, 0.15);
+  --blue: #0088ff;
+  --purple: #7c3aed;
+  --green: #10b981;
+  --green-dim: rgba(16, 185, 129, 0.6);
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --text-muted: #64748b;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-deep);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ══════════════════════════════════════════════
+   ANIMATED BACKGROUND
+   ══════════════════════════════════════════════ */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+.bg-glow {
+  position: fixed; width: 600px; height: 600px; border-radius: 50%;
+  filter: blur(120px); pointer-events: none; z-index: 0;
+  animation: glowPulse 6s ease-in-out infinite alternate;
+}
+.bg-glow-1 { top: -200px; right: -200px; background: radial-gradient(circle, rgba(0, 100, 255, 0.08), transparent); }
+.bg-glow-2 { bottom: -200px; left: -200px; background: radial-gradient(circle, rgba(124, 58, 237, 0.06), transparent); animation-delay: -3s; }
+
+@keyframes glowPause {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* ══════════════════════════════════════════════
+   SCROLLBAR
+   ══════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--cyan-muted); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan-dim); }
+
+/* ══════════════════════════════════════════════
+   HERO
+   ══════════════════════════════════════════════ */
+.hero {
+  position: relative; z-index: 1;
+  min-height: 100vh; display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  text-align: center; padding: 2rem;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.4rem 1.2rem; border-radius: 100px;
+  border: 1px solid var(--cyan-muted);
+  background: rgba(0, 212, 255, 0.05);
+  font-size: 0.8rem; color: var(--cyan-dim); letter-spacing: 0.1em;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+}
+.hero-badge::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); animation: dotPulse 2s ease-in-out infinite;
+}
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--green); }
+  50% { opacity: 0.4; box-shadow: 0 0 0 transparent; }
+}
+
+.hero h1 {
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  font-weight: 800; line-height: 1.1; margin-bottom: 1rem;
+  background: linear-gradient(135deg, #fff 0%, var(--cyan) 40%, var(--blue) 70%, var(--purple) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-sub {
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  color: var(--text-dim); max-width: 700px; margin-bottom: 2.5rem;
+  font-weight: 300;
+}
+
+.hero-stats {
+  display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center;
+  margin-bottom: 3rem;
+}
+.hero-stat {
+  background: var(--bg-card); border: 1px solid var(--border-glow);
+  border-radius: 12px; padding: 1rem 1.8rem;
+  backdrop-filter: blur(20px); min-width: 120px;
+}
+.hero-stat .num {
+  font-size: 1.6rem; font-weight: 700; color: var(--cyan);
+  font-family: var(--font-mono);
+}
+.hero-stat .label {
+  font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+.scroll-indicator {
+  position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  color: var(--text-muted); font-size: 0.7rem; letter-spacing: 0.1em;
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(8px); }
+}
+.scroll-indicator .arrow {
+  width: 20px; height: 20px; border-right: 2px solid var(--text-muted);
+  border-bottom: 2px solid var(--text-muted); transform: rotate(45deg);
+}
+
+/* ══════════════════════════════════════════════
+   NAV
+   ══════════════════════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 1rem 2rem;
+  background: linear-gradient(180deg, rgba(6,8,15,0.95) 0%, transparent 100%);
+  display: flex; justify-content: space-between; align-items: center;
+}
+nav .logo {
+  font-weight: 700; font-size: 1.1rem;
+  background: linear-gradient(135deg, var(--cyan), var(--blue));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+nav .nav-links { display: flex; gap: 1rem; flex-wrap: wrap; }
+nav .nav-links a {
+  color: var(--text-dim); text-decoration: none;
+  font-size: 0.8rem; transition: color 0.3s;
+  padding: 0.3rem 0.6rem; border-radius: 6px;
+}
+nav .nav-links a:hover { color: var(--cyan); background: var(--cyan-muted); }
+
+/* ══════════════════════════════════════════════
+   SECTIONS
+   ══════════════════════════════════════════════ */
+.section {
+  position: relative; z-index: 1;
+  max-width: 1200px; margin: 0 auto; padding: 6rem 2rem;
+}
+.section-header {
+  margin-bottom: 3rem; text-align: center;
+}
+.section-header .tag {
+  display: inline-block; font-size: 0.7rem; letter-spacing: 0.15em;
+  color: var(--cyan-dim); text-transform: uppercase;
+  padding: 0.25rem 1rem; border: 1px solid var(--cyan-muted);
+  border-radius: 100px; margin-bottom: 1rem;
+}
+.section-header h2 {
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  font-weight: 700; margin-bottom: 0.5rem;
+}
+.section-header p {
+  color: var(--text-dim); max-width: 600px; margin: 0 auto;
+  font-weight: 300;
+}
+
+/* ══════════════════════════════════════════════
+   CARDS
+   ══════════════════════════════════════════════ */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.2rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+
+.card {
+  background: var(--bg-card); border: 1px solid var(--border-glow);
+  border-radius: 16px; padding: 1.5rem;
+  backdrop-filter: blur(20px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 2px; background: linear-gradient(90deg, transparent, var(--cyan-muted), transparent);
+  opacity: 0; transition: opacity 0.4s;
+}
+.card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-active);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(0, 212, 255, 0.06);
+}
+.card:hover::before { opacity: 1; }
+
+.card .icon { font-size: 1.5rem; margin-bottom: 0.8rem; display: block; }
+.card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+.card p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; }
+.card .spec { font-size: 0.75rem; font-family: var(--font-mono); color: var(--cyan-dim); margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05); }
+
+.card-accent-blue { border-left: 2px solid var(--blue); }
+.card-accent-cyan { border-left: 2px solid var(--cyan); }
+.card-accent-green { border-left: 2px solid var(--green); }
+.card-accent-purple { border-left: 2px solid var(--purple); }
+.card-accent-amber { border-left: 2px solid var(--amber); }
+.card-accent-red { border-left: 2px solid var(--red); }
+
+/* ══════════════════════════════════════════════
+   ARCHITECTURE DIAGRAM
+   ══════════════════════════════════════════════ */
+.arch { margin: 2rem 0; }
+.arch-layer {
+  background: var(--bg-card); border: 1px solid var(--border-glow);
+  border-radius: 12px; padding: 1.2rem; margin-bottom: 0.8rem;
+}
+.arch-layer .layer-label {
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--cyan-dim); margin-bottom: 0.8rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.arch-layer .layer-label .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.arch-blocks { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.arch-block {
+  background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.1);
+  border-radius: 8px; padding: 0.6rem 1rem;
+  font-size: 0.8rem; color: var(--text-dim);
+  flex: 1; min-width: 80px; text-align: center;
+  transition: all 0.3s;
+}
+.arch-block:hover { background: rgba(0, 212, 255, 0.1); border-color: var(--cyan-muted); color: var(--text); }
+.arch-block .block-label { font-weight: 500; font-size: 0.75rem; }
+.arch-block .block-sub { font-size: 0.65rem; color: var(--text-muted); margin-top: 0.2rem; font-family: var(--font-mono); }
+.arch-connector { text-align: center; color: var(--text-muted); font-size: 0.7rem; padding: 0.3rem 0; font-family: var(--font-mono); }
+
+/* ══════════════════════════════════════════════
+   SPEC TABLES
+   ══════════════════════════════════════════════ */
+.spec-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.spec-table th, .spec-table td {
+  padding: 0.6rem 1rem; text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.spec-table th { color: var(--text-muted); font-weight: 500; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.spec-table td { color: var(--text-dim); }
+.spec-table tr:hover td { color: var(--text); }
+.spec-table .highlight { color: var(--cyan); font-weight: 600; }
+.spec-table .win { color: var(--green); }
+.spec-table .lose { color: var(--text-muted); }
+
+/* ══════════════════════════════════════════════
+   METRIC RINGS / PROGRESS
+   ══════════════════════════════════════════════ */
+.metric-ring {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.metric-ring .ring-value {
+  font-family: var(--font-mono); font-size: 2rem; font-weight: 700;
+  background: linear-gradient(135deg, var(--cyan), var(--blue));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.metric-ring .ring-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem; }
+.metric-ring .ring-bar {
+  width: 100%; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; margin-top: 0.5rem; overflow: hidden;
+}
+.metric-ring .ring-bar-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--blue));
+  transition: width 1.5s ease;
+}
+
+/* ══════════════════════════════════════════════
+   FLOW / PIPELINE
+   ══════════════════════════════════════════════ */
+.pipeline {
+  display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; justify-content: center;
+  margin: 1.5rem 0;
+}
+.pipeline-step {
+  background: var(--bg-card); border: 1px solid var(--border-glow);
+  border-radius: 10px; padding: 0.8rem 1.2rem; text-align: center;
+  flex: 1; min-width: 100px;
+}
+.pipeline-step .step-icon { font-size: 1.2rem; margin-bottom: 0.3rem; }
+.pipeline-step .step-label { font-size: 0.72rem; color: var(--text-dim); font-weight: 500; }
+.pipeline-step .step-sub { font-size: 0.65rem; color: var(--text-muted); font-family: var(--font-mono); }
+.pipeline-arrow { color: var(--cyan-dim); font-size: 1.2rem; font-weight: 300; }
+
+/* ══════════════════════════════════════════════
+   TIMELINE
+   ══════════════════════════════════════════════ */
+.timeline { position: relative; padding-left: 2rem; margin: 2rem 0; }
+.timeline::before {
+  content: ''; position: absolute; left: 6px; top: 0; bottom: 0;
+  width: 2px; background: linear-gradient(180deg, var(--cyan-muted), var(--purple), transparent);
+}
+.timeline-item { position: relative; margin-bottom: 1.5rem; }
+.timeline-item::before {
+  content: ''; position: absolute; left: -2rem; top: 0.5rem;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--bg-deep); border: 2px solid var(--cyan);
+}
+.timeline-item .tl-phase { font-size: 0.7rem; color: var(--cyan-dim); text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--font-mono); }
+.timeline-item h4 { font-size: 0.95rem; margin: 0.2rem 0; }
+.timeline-item p { font-size: 0.8rem; color: var(--text-dim); }
+
+.phase-card {
+  background: var(--bg-card); border: 1px solid var(--border-glow);
+  border-radius: 12px; padding: 1rem; margin-bottom: 0.8rem;
+}
+.phase-card .phase-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+.phase-card .phase-name { font-weight: 600; font-size: 0.85rem; }
+.phase-card .phase-cost { font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); }
+.phase-card .phase-detail { font-size: 0.78rem; color: var(--text-dim); line-height: 1.6; }
+
+/* ══════════════════════════════════════════════
+   COMPARISON TABLE
+   ══════════════════════════════════════════════ */
+.compact-table { font-size: 0.78rem; width: 100%; border-collapse: collapse; }
+.compact-table th { padding: 0.5rem 0.6rem; color: var(--text-muted); font-weight: 500; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: left; }
+.compact-table td { padding: 0.5rem 0.6rem; color: var(--text-dim); border-bottom: 1px solid rgba(255,255,255,0.03); }
+.compact-table tr:hover td { color: var(--text); }
+.compact-table .highlight-col { color: var(--cyan); font-weight: 600; }
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .section { padding: 3rem 1rem; }
+  nav .nav-links { display: none; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .pipeline { flex-direction: column; }
+  .pipeline-arrow { transform: rotate(90deg); }
+  .hero h1 { font-size: 2rem; }
+}
+
+/* ══════════════════════════════════════════════
+   SCROLL ANIMATIONS (simple reveal)
+   ══════════════════════════════════════════════ */
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ══════════════════════════════════════════════
+   FOOTER
+   ══════════════════════════════════════════════ */
+.footer {
+  position: relative; z-index: 1;
+  text-align: center; padding: 3rem 2rem;
+  color: var(--text-muted); font-size: 0.78rem;
+  border-top: 1px solid rgba(255,255,255,0.03);
+}
+.footer a { color: var(--cyan-dim); text-decoration: none; }
+.footer a:hover { color: var(--cyan); }
+
+/* ─── chip comparison visual ─── */
+.chip-row { display: flex; gap: 1rem; margin: 1rem 0; flex-wrap: wrap; }
+.chip-card {
+  flex: 1; min-width: 200px;
+  background: var(--bg-card); border: 1px solid var(--border-glow);
+  border-radius: 12px; padding: 1rem; text-align: center;
+}
+.chip-card.selected { border-color: var(--cyan-muted); background: rgba(0, 212, 255, 0.05); }
+.chip-card .chip-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; }
+.chip-card .chip-price { font-family: var(--font-mono); font-size: 1.2rem; color: var(--cyan); font-weight: 700; }
+.chip-card .chip-price-label { font-size: 0.65rem; color: var(--text-muted); }
+.chip-card .chip-stars { margin: 0.5rem 0; font-size: 0.7rem; color: var(--amber); }
+.chip-card .chip-specs { font-size: 0.72rem; color: var(--text-dim); }
+.chip-card .chip-specs div { margin: 0.2rem 0; }
+.chip-card .chip-tag {
+  display: inline-block; font-size: 0.6rem; padding: 0.15rem 0.6rem;
+  border-radius: 100px; margin-top: 0.4rem;
+}
+.chip-tag-recommend { background: rgba(16, 185, 129, 0.15); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.2); }
+.chip-tag-alt { background: rgba(0, 212, 255, 0.1); color: var(--cyan-dim); border: 1px solid rgba(0, 212, 255, 0.15); }
+</style>
+</head>
+<body>
+
+<!-- ═══ BG EFFECTS ═══ -->
+<div class="bg-grid"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <div class="logo">◆ EldCare · 技术白皮书</div>
+  <div class="nav-links">
+    <a href="#arch">系统架构</a>
+    <a href="#radar">雷达技术</a>
+    <a href="#edge">边缘AI</a>
+    <a href="#models">AI模型</a>
+    <a href="#data">数据策略</a>
+    <a href="#specs">技术规格</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-badge">⚡ 边缘AI · 60GHz雷达 · NPU推理</div>
+  <h1>银发守护者<br>技术全景</h1>
+  <p class="hero-sub">非接触式生命体征监测 · 全本地边缘AI推理 · 养老院级可靠性<br>
+  从毫米波雷达信号到跌倒告警，全链路技术解密</p>
+
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">60<span style="font-size:0.9rem;font-weight:400;">GHz</span></div><div class="label">雷达频率</div></div>
+    <div class="hero-stat"><div class="num">&lt;50<span style="font-size:0.9rem;font-weight:400;">ms</span></div><div class="label">推理延迟</div></div>
+    <div class="hero-stat"><div class="num">&lt;500<span style="font-size:0.9rem;font-weight:400;">KB</span></div><div class="label">模型大小</div></div>
+    <div class="hero-stat"><div class="num">&gt;96<span style="font-size:0.9rem;font-weight:400;">%</span></div><div class="label">召回率</div></div>
+    <div class="hero-stat"><div class="num">¥180</div><div class="label">BOM成本</div></div>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>向下探索</span>
+    <div class="arrow"></div>
+  </div>
+</section>
+
+<!-- ═══ 1. SYSTEM ARCHITECTURE ═══ -->
+<section class="section" id="arch">
+  <div class="section-header reveal">
+    <div class="tag">System Architecture</div>
+    <h2>全栈系统架构</h2>
+    <p>从60GHz雷达信号采集到云端管理平台，全链路本地化边缘AI推理</p>
+  </div>
+
+  <div class="arch reveal">
+    <!-- Cloud -->
+    <div class="arch-layer" style="border-color:rgba(124,58,237,0.2);">
+      <div class="layer-label"><span class="dot" style="background:var(--purple);"></span> ☁️ 云端 · EldCare Cloud</div>
+      <div class="arch-blocks">
+        <div class="arch-block" style="border-color:rgba(124,58,237,0.15);"><div class="block-label">设备管理</div><div class="block-sub">注册·OTA·状态</div></div>
+        <div class="arch-block" style="border-color:rgba(124,58,237,0.15);"><div class="block-label">实时看板</div><div class="block-sub">楼层总览·趋势</div></div>
+        <div class="arch-block" style="border-color:rgba(124,58,237,0.15);"><div class="block-label">告警引擎</div><div class="block-sub">分级推送·升级</div></div>
+        <div class="arch-block" style="border-color:rgba(124,58,237,0.15);"><div class="block-label">模型OTA</div><div class="block-sub">远程升级·A/B</div></div>
+      </div>
+    </div>
+
+    <div class="arch-connector">⬆ 4G Cat.1 / Wi-Fi · MQTT ⬆</div>
+
+    <!-- Edge -->
+    <div class="arch-layer" style="border-color:rgba(0,212,255,0.2);">
+      <div class="layer-label"><span class="dot" style="background:var(--cyan);"></span> 🏠 边端 · EldCare 监测器（每间房一台）</div>
+      <div class="arch-blocks">
+        <div class="arch-block" style="border-color:rgba(0,212,255,0.15);"><div class="block-label">📡 60GHz雷达</div><div class="block-sub">IWR6843 · 3T4R MIMO</div></div>
+        <div class="arch-block" style="border-color:rgba(0,212,255,0.15);"><div class="block-label">🧠 AI推理引擎</div><div class="block-sub">ONNX Runtime · INT8</div></div>
+        <div class="arch-block" style="border-color:rgba(0,212,255,0.15);"><div class="block-label">🔗 通信模块</div><div class="block-sub">WiFi+4G双模</div></div>
+      </div>
+      <div style="margin-top:0.6rem; display:flex; flex-wrap:wrap; gap:0.4rem;">
+        <span style="font-size:0.65rem; padding:0.2rem 0.6rem; background:rgba(0,212,255,0.05); border-radius:4px; color:var(--text-muted); font-family:var(--font-mono);">FallNet · 跌倒检测</span>
+        <span style="font-size:0.65rem; padding:0.2rem 0.6rem; background:rgba(0,212,255,0.05); border-radius:4px; color:var(--text-muted); font-family:var(--font-mono);">VitalNet · 呼吸心率</span>
+        <span style="font-size:0.65rem; padding:0.2rem 0.6rem; background:rgba(0,212,255,0.05); border-radius:4px; color:var(--text-muted); font-family:var(--font-mono);">BedNet · 在床检测</span>
+        <span style="font-size:0.65rem; padding:0.2rem 0.6rem; background:rgba(0,212,255,0.05); border-radius:4px; color:var(--text-muted); font-family:var(--font-mono);">SleepNet · 睡眠分期</span>
+      </div>
+    </div>
+
+    <div class="arch-connector">⬆ 本地推理 · 全不上云 · &lt;50ms/帧 ⬆</div>
+
+    <!-- Radar -->
+    <div class="arch-layer" style="border-color:rgba(16,185,129,0.2);">
+      <div class="layer-label"><span class="dot" style="background:var(--green);"></span> 📡 感知层 · 60GHz FMCW雷达</div>
+      <div class="arch-blocks">
+        <div class="arch-block" style="border-color:rgba(16,185,129,0.15);"><div class="block-label">FMCW波形</div><div class="block-sub">60-64GHz · 4GHz带宽</div></div>
+        <div class="arch-block" style="border-color:rgba(16,185,129,0.15);"><div class="block-label">3T4R MIMO</div><div class="block-sub">12通道虚拟阵列</div></div>
+        <div class="arch-block" style="border-color:rgba(16,185,129,0.15);"><div class="block-label">点云生成</div><div class="block-sub">距离·速度·角度</div></div>
+        <div class="arch-block" style="border-color:rgba(16,185,129,0.15);"><div class="block-label">目标分离</div><div class="block-sub">DBSCAN+卡尔曼</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="reveal" style="margin-top:2rem;">
+    <div style="text-align:center; margin-bottom:1rem; font-size:0.8rem; color:var(--text-muted);">数据推理流水线</div>
+    <div class="pipeline">
+      <div class="pipeline-step"><div class="step-icon">📡</div><div class="step-label">雷达采集</div><div class="step-sub">20fps点云</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="step-icon">🔍</div><div class="step-label">目标检测</div><div class="step-sub">CFAR+DBSCAN</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="step-icon">🧠</div><div class="step-label">特征提取</div><div class="step-sub">运动·形态·时序</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="step-icon">⚡</div><div class="step-label">三级判定</div><div class="step-sub">CNN+LSTM</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="step-icon">🔔</div><div class="step-label">告警推送</div><div class="step-sub">&lt;2秒</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2. RADAR TECHNOLOGY ═══ -->
+<section class="section" id="radar">
+  <div class="section-header reveal">
+    <div class="tag">Radar Technology</div>
+    <h2>60GHz毫米波雷达技术</h2>
+    <p>3发4收MIMO天线 · 3.75cm距离分辨率 · 四维点云感知</p>
+  </div>
+
+  <div class="grid-2 reveal">
+    <div class="card card-accent-cyan">
+      <span class="icon">📡</span>
+      <h3>FMCW 调频连续波</h3>
+      <p>60-64GHz扫频带宽4GHz，距离分辨率3.75cm。通过对回波信号进行距离-FFT、多普勒-FFT和角度-FFT三维变换，生成包含距离(r)、多普勒速度(v)、方位角(θ)和俯仰角(φ)的四维点云。</p>
+      <div class="spec">带宽 4GHz · 分辨率 3.75cm · 帧率 20fps</div>
+    </div>
+    <div class="card card-accent-green">
+      <span class="icon">📐</span>
+      <h3>3T4R MIMO 虚拟阵列</h3>
+      <p>通过时分复用MIMO技术，3个发射天线和4个接收天线可形成12通道虚拟天线阵列，角度分辨率达到10°。可精确区分双人间中相距1.5-2m的两张床。</p>
+      <div class="spec">12通道虚拟MIMO · 角度分辨率 ~10°</div>
+    </div>
+    <div class="card card-accent-purple">
+      <span class="icon">🎯</span>
+      <h3>多目标分离与追踪</h3>
+      <p>基于DBSCAN聚类的目标分离算法，距离差>0.5m或角度差>10°判定为不同目标。每个目标分配独立Track ID，通过扩展卡尔曼滤波进行连续帧关联追踪。</p>
+      <div class="spec">DBSCAN聚类 · 卡尔曼滤波 · 丢帧3帧恢复</div>
+    </div>
+    <div class="card card-accent-amber">
+      <span class="icon">🔄</span>
+      <h3>静态杂波抑制</h3>
+      <p>CFAR（恒虚警率）检测器自适应滤除墙壁、家具等静态杂波反射，仅保留运动人体目标。配合背景对消算法，在复杂室内环境下稳定工作。</p>
+      <div class="spec">CFAR检测 · 背景对消 · 自适应阈值</div>
+    </div>
+  </div>
+
+  <!-- Chip Comparison -->
+  <div class="reveal" style="margin-top:2rem;">
+    <h3 style="text-align:center; font-size:1.1rem; margin-bottom:1rem;">雷达芯片选型对比</h3>
+    <div style="overflow-x:auto;">
+    <table class="compact-table">
+      <thead>
+        <tr><th>参数</th><th>TI IWR6843</th><th style="color:var(--cyan);">⭐ Infineon BGT60TR13C</th><th>Acconeer A111</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>频率</td><td>60-64 GHz</td><td>60-64 GHz</td><td>60-64 GHz</td></tr>
+        <tr><td>收发通道</td><td><span class="win">3T4R (12通道)</span></td><td>1T1R</td><td>1T1R</td></tr>
+        <tr><td>探测距离</td><td><span class="win">0-10m</span></td><td>0-5m</td><td>0-15m</td></tr>
+        <tr><td>测距精度</td><td>&lt; 4cm</td><td>&lt; 5cm</td><td><span class="win">&lt; 2mm</span></td></tr>
+        <tr><td>功耗</td><td>1.2W</td><td><span class="win">0.8W</span></td><td><span class="win">0.5W</span></td></tr>
+        <tr><td>批量价格 (1ku)</td><td>¥105-120</td><td><span class="highlight-col">¥65-80</span></td><td>¥90-110</td></tr>
+        <tr><td>天线设计</td><td>需额外PCB天线</td><td><span class="win">片内集成天线</span></td><td>需额外PCB天线</td></tr>
+        <tr><td>量产成熟度</td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="chip-row" style="margin-top:1rem;">
+      <div class="chip-card selected" style="min-width:100%;">
+        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+          <div><div class="chip-name">Phase 1 · 原型验证</div><div class="chip-specs">TI IWR6843 开发套件 (¥1,500/套) — 文档最全，性能最强</div></div>
+          <div><div class="chip-name">Phase 2 · 量产选型</div><div class="chip-specs"><span style="color:var(--green);">▶ 优先: Infineon BGT60TR13C</span>（集成天线→射频门槛最低）<br>▶ 备选: TI IWR6843（多通道性能更强）</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3. EDGE AI ═══ -->
+<section class="section" id="edge" style="background:linear-gradient(180deg, transparent 0%, rgba(0,100,255,0.02) 50%, transparent 100%);">
+  <div class="section-header reveal">
+    <div class="tag">Edge AI · NPU Deployment</div>
+    <h2>边缘AI推理引擎</h2>
+    <p>全本地推理 · INT8量化 · &lt;1 TOPS算力 · &lt;50ms延迟</p>
+  </div>
+
+  <div class="grid-3 reveal">
+    <div class="card card-accent-cyan">
+      <span class="icon">🧠</span>
+      <h3>ONNX Runtime 推理引擎</h3>
+      <p>跨平台推理引擎，支持多后端加速。模型从PyTorch导出为ONNX格式后，经过INT8对称量化校准，部署到NPU加速后端。</p>
+      <div class="spec">FP32 → ONNX → INT8 · 校准数据集 500段</div>
+    </div>
+    <div class="card card-accent-green">
+      <span class="icon">⚡</span>
+      <h3>INT8 对称量化</h3>
+      <p>模型权重从FP32压缩到INT8，体积缩小4倍，推理速度提升2-4倍。使用500段代表性数据进行逐通道对称量化校准，精度损失控制在1-2%以内。</p>
+      <div class="spec">4× 体积压缩 · 2-4× 加速 · 精度损失 &lt;2%</div>
+    </div>
+    <div class="card card-accent-purple">
+      <span class="icon">📦</span>
+      <h3>多模型调度</h3>
+      <p>FallNet、VitalNet、BedNet、SleepNet四模型共存于同一边缘设备。通过异步推理流水线实现雷达采集→模型推理→告警输出的全流水线优化。</p>
+      <div class="spec">4模型 &lt; 500KB INT8 · 异步流水线 &lt; 100ms</div>
+    </div>
+    <div class="card card-accent-amber">
+      <span class="icon">🔌</span>
+      <h3>NPU 多后端支持</h3>
+      <p>团队具备 Rockchip VIP-9000 (RKNN)、TensorRT、TFLite Micro 等多后端部署经验。可根据量产选型灵活切换NPU平台。</p>
+      <div class="spec">VIP-9000 · TensorRT · TFLite Micro</div>
+    </div>
+    <div class="card card-accent-red">
+      <span class="icon">🔄</span>
+      <h3>OTA 模型远程升级</h3>
+      <p>算法持续进化——部署后在养老院采集真实数据→云端迭代模型→INT8量化→OTA推送到边缘设备。硬件无需更换，算法持续更新。</p>
+      <div class="spec">远程推送 · A/B测试 · 一键回滚</div>
+    </div>
+    <div class="card card-accent-cyan">
+      <span class="icon">🔒</span>
+      <h3>全本地推理 · 隐私零泄露</h3>
+      <p>所有AI推理在边缘端完成，原始雷达数据不出设备。仅告警事件和匿名化统计信息上报云端，从架构层面彻底解决隐私问题。</p>
+      <div class="spec">原始数据不上云 · 符合《个人信息保护法》</div>
+    </div>
+  </div>
+
+  <!-- Deployment Pipeline -->
+  <div class="reveal" style="margin-top:2rem; background:var(--bg-card); border:1px solid var(--border-glow); border-radius:12px; padding:1.5rem;">
+    <h3 style="font-size:0.95rem; margin-bottom:1rem; text-align:center;">模型部署流水线</h3>
+    <div class="pipeline">
+      <div class="pipeline-step"><div class="step-icon">🔬</div><div class="step-label">1. 训练</div><div class="step-sub">PyTorch FP32</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="step-icon">📤</div><div class="step-label">2. 导出</div><div class="step-sub">ONNX格式</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="step-icon">⚖️</div><div class="step-label">3. 量化</div><div class="step-sub">INT8校准</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="step-icon">✅</div><div class="step-label">4. 验证</div><div class="step-sub">精度对齐</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="step-icon">📦</div><div class="step-label">5. 部署</div><div class="step-sub">NPU后端</div></div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step"><div class="step-icon">🔄</div><div class="step-label">6. OTA</div><div class="step-sub">远程升级</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4. AI MODELS ═══ -->
+<section class="section" id="models">
+  <div class="section-header reveal">
+    <div class="tag">AI Models</div>
+    <h2>核心AI模型族</h2>
+    <p>四模型协同 · 全INT8量化 · 整包 &lt; 500KB</p>
+  </div>
+
+  <!-- Model Cards -->
+  <div class="grid-2 reveal">
+    <div class="card" style="border-top:2px solid var(--red);">
+      <div style="display:flex; justify-content:space-between; align-items:start;">
+        <div><span class="icon">🚨</span><h3>FallNet · 跌倒检测</h3></div>
+        <span style="font-size:0.6rem; padding:0.15rem 0.5rem; background:rgba(239,68,68,0.1); color:var(--red); border-radius:100px; border:1px solid rgba(239,68,68,0.2);">Phase 2</span>
+      </div>
+      <p>基于雷达点云轨迹的1D CNN + BiLSTM混合架构。提取运动学特征（V_z、a_z）、形态学特征（点云分布范围）和时序模式特征（失稳期→撞击期→静止期三阶段检测）。三层分级判定架构。</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; margin-top:0.6rem; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.05);">
+        <div class="metric-ring"><div class="ring-value">96.8%</div><div class="ring-label">召回率</div></div>
+        <div class="metric-ring"><div class="ring-value">93.5%</div><div class="ring-label">精确率</div></div>
+        <div class="metric-ring"><div class="ring-value">320KB</div><div class="ring-label">模型大小</div></div>
+      </div>
+    </div>
+
+    <div class="card" style="border-top:2px solid var(--cyan);">
+      <div><span class="icon">❤️</span><h3>VitalNet · 呼吸心率估计</h3></div>
+      <p>时序Transformer-tiny架构，通过分析雷达I/Q帧序列中人体胸廓微动引起的相位变化，精确估计呼吸频率和心率。利用相位差分法提取微小心跳信号。</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; margin-top:0.6rem; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.05);">
+        <div class="metric-ring"><div class="ring-value">&lt;5%</div><div class="ring-label">MAPE</div></div>
+        <div class="metric-ring"><div class="ring-value">180KB</div><div class="ring-label">模型大小</div></div>
+        <div class="metric-ring"><div class="ring-value">1s</div><div class="ring-label">窗口长度</div></div>
+      </div>
+    </div>
+
+    <div class="card" style="border-top:2px solid var(--green);">
+      <div><span class="icon">🛏️</span><h3>BedNet · 在床/离床分类</h3></div>
+      <p>MobileNetV1-1D轻量分类模型，基于单帧range profile即可准确判断在床/离床状态。超低功耗设计，可在极低算力下运行，用于触发跌倒检测增强模式。</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; margin-top:0.6rem; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.05);">
+        <div class="metric-ring"><div class="ring-value">&gt;99%</div><div class="ring-label">准确率</div></div>
+        <div class="metric-ring"><div class="ring-value">80KB</div><div class="ring-label">模型大小</div></div>
+        <div class="metric-ring"><div class="ring-value">&lt;5ms</div><div class="ring-label">推理延迟</div></div>
+      </div>
+    </div>
+
+    <div class="card" style="border-top:2px solid var(--purple);">
+      <div><span class="icon">🌙</span><h3>SleepNet · 睡眠分期</h3></div>
+      <p>基于TCN（时序卷积网络）的睡眠分期模型，通过分析整夜呼吸+体动时序信号，将睡眠分为深睡/浅睡/REM/清醒四期。辅助评估老人健康状况。</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; margin-top:0.6rem; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.05);">
+        <div class="metric-ring"><div class="ring-value">κ&gt;0.6</div><div class="ring-label">一致性</div></div>
+        <div class="metric-ring"><div class="ring-value">250KB</div><div class="ring-label">模型大小</div></div>
+        <div class="metric-ring"><div class="ring-value">8h</div><div class="ring-label">分析窗口</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three-level decision -->
+  <div class="reveal" style="margin-top:2rem;">
+    <h3 style="text-align:center; font-size:1rem; margin-bottom:1rem;">三层分级判定架构</h3>
+    <div class="pipeline">
+      <div class="pipeline-step" style="border:1px solid rgba(245,158,11,0.3);">
+        <div class="step-icon">⚡</div>
+        <div class="step-label"><strong>Level 1 · 运动预筛</strong></div>
+        <div class="step-sub">V_z &gt; 0.8m/s? 每帧执行</div>
+        <div style="font-size:0.6rem; color:var(--text-muted); margin-top:0.3rem;">过滤99%非跌倒帧</div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step" style="border:1px solid rgba(0,212,255,0.3);">
+        <div class="step-icon">🧠</div>
+        <div class="step-label"><strong>Level 2 · CNN分类</strong></div>
+        <div class="step-sub">1D CNN · P_fall &gt; 0.7</div>
+        <div style="font-size:0.6rem; color:var(--text-muted); margin-top:0.3rem;">每0.5s窗口</div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step" style="border:1px solid rgba(239,68,68,0.3);">
+        <div class="step-icon">✅</div>
+        <div class="step-label"><strong>Level 3 · LSTM验证</strong></div>
+        <div class="step-sub">BiLSTM · 三阶段连续?</div>
+        <div style="font-size:0.6rem; color:var(--text-muted); margin-top:0.3rem;">2s滑动窗口</div>
+      </div>
+    </div>
+    <div style="text-align:center; font-size:0.78rem; color:var(--text-dim); margin-top:0.8rem;">
+      最终输出: 跌倒确认 → &lt;2秒告警 ｜ uncertain → 继续观察1s ｜ 非跌倒 → 返回
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5. DATA STRATEGY ═══ -->
+<section class="section" id="data" style="background:linear-gradient(180deg, transparent 0%, rgba(124,58,237,0.02) 50%, transparent 100%);">
+  <div class="section-header reveal">
+    <div class="tag">Data Strategy</div>
+    <h2>三阶段数据策略</h2>
+    <p>从合成数据到真实环境，逐步攻克跌倒检测数据稀缺难题</p>
+  </div>
+
+  <div class="grid-3 reveal">
+    <div class="phase-card" style="border-left:2px solid var(--amber);">
+      <div class="phase-header">
+        <span class="phase-name">Phase 1 · 合成数据</span>
+        <span class="phase-cost">Month 1-2</span>
+      </div>
+      <div class="phase-detail">
+        Unity + TI mmWave Studio 模拟器生成50种跌倒姿态×10方向×3速度 = 1,500种场景，每种重复5次 = 10,000+合成样本。<br>
+        <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted);">成本: ¥0 (算力资源)</span>
+      </div>
+    </div>
+    <div class="phase-card" style="border-left:2px solid var(--cyan);">
+      <div class="phase-header">
+        <span class="phase-name">Phase 2 · 实验室采集</span>
+        <span class="phase-cost">Month 2-4</span>
+      </div>
+      <div class="phase-detail">
+        15名志愿者(年龄25-65岁, BMI 18-30)执行200种动作×5次重复 = 15,000+标注数据。含100种跌倒+100种日常动作，同步录像标注。<br>
+        <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted);">成本: ¥5万 (志愿+标注)</span>
+      </div>
+    </div>
+    <div class="phase-card" style="border-left:2px solid var(--green);">
+      <div class="phase-header">
+        <span class="phase-name">Phase 3 · 真实环境</span>
+        <span class="phase-cost">Month 3-6</span>
+      </div>
+      <div class="phase-detail">
+        3家养老院部署60台预研设备，无标注数据→半监督学习。护工标注关键事件，持续6个月预计50,000+小时真实数据。<br>
+        <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted);">成本: ¥10万 (设备+部署)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Model evolution -->
+  <div class="reveal" style="margin-top:2rem;">
+    <h3 style="text-align:center; font-size:1rem; margin-bottom:1rem;">模型精度演进</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:0.8rem;">
+      <div style="text-align:center; padding:0.8rem; background:var(--bg-card); border-radius:8px; border:1px solid var(--border-glow);">
+        <div style="font-size:0.7rem; color:var(--text-muted);">Month 2</div>
+        <div style="font-family:var(--font-mono); font-size:1.3rem; font-weight:700; color:var(--amber);">F1 0.70</div>
+        <div style="font-size:0.7rem; color:var(--text-dim);">合成数据预训练</div>
+        <div style="margin-top:0.3rem; height:4px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden;"><div style="height:100%; width:70%; background:linear-gradient(90deg, var(--amber), var(--cyan)); border-radius:2px;"></div></div>
+      </div>
+      <div style="text-align:center; padding:0.8rem; background:var(--bg-card); border-radius:8px; border:1px solid var(--border-glow);">
+        <div style="font-size:0.7rem; color:var(--text-muted);">Month 4</div>
+        <div style="font-family:var(--font-mono); font-size:1.3rem; font-weight:700; color:var(--cyan);">F1 0.85</div>
+        <div style="font-size:0.7rem; color:var(--text-dim);">实验室数据</div>
+        <div style="margin-top:0.3rem; height:4px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden;"><div style="height:100%; width:85%; background:linear-gradient(90deg, var(--cyan), var(--blue)); border-radius:2px;"></div></div>
+      </div>
+      <div style="text-align:center; padding:0.8rem; background:var(--bg-card); border-radius:8px; border:1px solid var(--border-glow);">
+        <div style="font-size:0.7rem; color:var(--text-muted);">Month 6</div>
+        <div style="font-family:var(--font-mono); font-size:1.3rem; font-weight:700; color:var(--green);">F1 0.92</div>
+        <div style="font-size:0.7rem; color:var(--text-dim);">真实环境迭代</div>
+        <div style="margin-top:0.3rem; height:4px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden;"><div style="height:100%; width:92%; background:linear-gradient(90deg, var(--green), var(--cyan)); border-radius:2px;"></div></div>
+      </div>
+      <div style="text-align:center; padding:0.8rem; background:var(--bg-card); border-radius:8px; border:1px solid var(--border-glow);">
+        <div style="font-size:0.7rem; color:var(--text-muted);">Month 9+</div>
+        <div style="font-family:var(--font-mono); font-size:1.3rem; font-weight:700; color:var(--cyan);">F1 &gt; 0.95</div>
+        <div style="font-size:0.7rem; color:var(--text-dim);">持续OTA迭代</div>
+        <div style="margin-top:0.3rem; height:4px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden;"><div style="height:100%; width:96%; background:linear-gradient(90deg, var(--cyan), var(--blue)); border-radius:2px;"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6. SPECS ═══ -->
+<section class="section" id="specs">
+  <div class="section-header reveal">
+    <div class="tag">Technical Specifications</div>
+    <h2>完整技术规格</h2>
+    <p>从射频参数到边缘算力，全链路可量化指标</p>
+  </div>
+
+  <div class="grid-2 reveal">
+    <div class="card">
+      <h3>📡 雷达系统</h3>
+      <table class="spec-table">
+        <tr><th>参数</th><th>规格</th></tr>
+        <tr><td>工作频率</td><td>60-64 GHz</td></tr>
+        <tr><td>扫频带宽</td><td>4 GHz</td></tr>
+        <tr><td>距离分辨率</td><td>3.75 cm</td></tr>
+        <tr><td>最大探测距离</td><td>5 m</td></tr>
+        <tr><td>帧率</td><td>20 fps</td></tr>
+        <tr><td>天线配置</td><td>3T4R (12通道虚拟MIMO)</td></tr>
+        <tr><td>角度分辨率</td><td>~10°</td></tr>
+        <tr><td>功耗</td><td>&lt; 1.2W</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>🧠 边缘AI</h3>
+      <table class="spec-table">
+        <tr><th>参数</th><th>规格</th></tr>
+        <tr><td>处理器</td><td>ESP32-S3 / RV1106</td></tr>
+        <tr><td>NPU算力</td><td>0.5-1.0 TOPS (INT8)</td></tr>
+        <tr><td>推理引擎</td><td>ONNX Runtime + TFLite Micro</td></tr>
+        <tr><td>量化精度</td><td>INT8 对称量化</td></tr>
+        <tr><td>模型总大小</td><td>&lt; 500 KB</td></tr>
+        <tr><td>单帧推理</td><td>&lt; 50 ms</td></tr>
+        <tr><td>全流水线</td><td>&lt; 100 ms</td></tr>
+        <tr><td>内存</td><td>PSRAM 8MB + Flash 16MB</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>🔗 通信与电力</h3>
+      <table class="spec-table">
+        <tr><th>参数</th><th>规格</th></tr>
+        <tr><td>无线</td><td>WiFi 2.4GHz + 4G Cat.1 (双模)</td></tr>
+        <tr><td>协议</td><td>MQTT + HTTP</td></tr>
+        <tr><td>供电</td><td>Type-C 5V/2A 或 POE</td></tr>
+        <tr><td>整机功耗</td><td>&lt; 1.5W (含雷达)</td></tr>
+        <tr><td>OTA升级</td><td>远程模型推送 + A/B测试</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>📐 结构与安装</h3>
+      <table class="spec-table">
+        <tr><th>参数</th><th>规格</th></tr>
+        <tr><td>外观尺寸</td><td>86 × 86 × 25 mm</td></tr>
+        <tr><td>安装方式</td><td>贴墙 / 螺丝固定</td></tr>
+        <tr><td>安装高度</td><td>离地 1.5m</td></tr>
+        <tr><td>覆盖范围</td><td>3m 扇形 120°</td></tr>
+        <tr><td>LED指示</td><td>绿(正常) / 黄(离超时) / 红(跌倒)</td></tr>
+        <tr><td>BOM成本</td><td>¥180-230 (批量1ku)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Performance Metrics -->
+  <div class="reveal" style="margin-top:2rem;">
+    <div class="card" style="text-align:center;">
+      <h3 style="margin-bottom:1rem;">📊 性能指标总览</h3>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:1rem;">
+        <div class="metric-ring"><div class="ring-value">96.8%</div><div class="ring-label">跌倒召回率</div><div class="ring-bar"><div class="ring-bar-fill" style="width:97%;"></div></div></div>
+        <div class="metric-ring"><div class="ring-value">93.5%</div><div class="ring-label">跌倒精确率</div><div class="ring-bar"><div class="ring-bar-fill" style="width:94%;"></div></div></div>
+        <div class="metric-ring"><div class="ring-value">0.951</div><div class="ring-label">F1-Score</div><div class="ring-bar"><div class="ring-bar-fill" style="width:95%;"></div></div></div>
+        <div class="metric-ring"><div class="ring-value">&lt;5%</div><div class="ring-label">呼吸MAPE</div><div class="ring-bar"><div class="ring-bar-fill" style="width:80%;"></div></div></div>
+        <div class="metric-ring"><div class="ring-value">&gt;99%</div><div class="ring-label">在床准确率</div><div class="ring-bar"><div class="ring-bar-fill" style="width:99%;"></div></div></div>
+        <div class="metric-ring"><div class="ring-value">&lt;2s</div><div class="ring-label">告警延迟</div><div class="ring-bar"><div class="ring-bar-fill" style="width:95%;"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison -->
+  <div class="reveal" style="margin-top:2rem;">
+    <h3 style="text-align:center; font-size:1rem; margin-bottom:1rem;">与现有技术方案对比</h3>
+    <div style="overflow-x:auto;">
+    <table class="compact-table">
+      <thead><tr><th>指标</th><th>本方案 (EldCare)</th><th>24GHz雷达阈值法</th><th>加速度计方案</th><th>摄像头AI方案</th></tr></thead>
+      <tbody>
+        <tr><td>召回率</td><td class="highlight-col">96.8%</td><td>82.3%</td><td>89.1%</td><td>97.2%</td></tr>
+        <tr><td>精确率</td><td class="highlight-col">93.5%</td><td>61.7%</td><td>72.4%</td><td>95.1%</td></tr>
+        <tr><td>F1-Score</td><td class="highlight-col">0.951</td><td>0.704</td><td>0.799</td><td>0.961</td></tr>
+        <tr><td>误报率(次/天/20台)</td><td class="highlight-col">0.8</td><td>5.2</td><td>3.8</td><td>1.2</td></tr>
+        <tr><td>延迟</td><td class="highlight-col">&lt; 2s</td><td>&lt; 1s</td><td>&lt; 1s</td><td>&lt; 3s</td></tr>
+        <tr><td>隐私侵犯</td><td class="highlight-col">✅ 无</td><td>✅ 无</td><td>✅ 无</td><td>❌ 严重</td></tr>
+        <tr><td>老人配合</td><td class="highlight-col">无需配合</td><td>无需配合</td><td>需佩戴</td><td>无需配合</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>EldCare · 银发守护者 — 技术白皮书 v1.0</p>
+  <p style="margin-top:0.3rem;">基于 Rockchip NPU 部署经验 · ONNX Runtime · 60GHz 毫米波雷达</p>
+  <p style="margin-top:0.3rem; font-size:0.7rem; color:var(--text-muted);">© 2025 EldCare · 仅供内部评审使用</p>
+</footer>
+
+<script>
+// Reveal on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Active nav highlight
+const sections = document.querySelectorAll('.section');
+const navLinks = document.querySelectorAll('.nav-links a');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(section => {
+    const top = section.offsetTop - 200;
+    if (window.scrollY >= top) current = section.id;
+  });
+  navLinks.forEach(link => {
+    link.style.background = link.getAttribute('href') === '#' + current
+      ? 'rgba(0,212,255,0.1)' : 'transparent';
+  });
+});
+</script>
+
+</body>
+</html>
