@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EldCare · 硬件设计与软件架构</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#06080f;--c:rgba(12,20,35,.85);--l:rgba(0,180,255,.12);--la:rgba(0,212,255,.5);--cy:#00d4ff;--cyd:rgba(0,212,255,.6);--cya:rgba(0,212,255,.12);--bl:#0088ff;--pu:#7c3aed;--gr:#10b981;--am:#f59e0b;--re:#ef4444;--pi:#ec4899;--t:#e2e8f0;--td:#94a3b8;--tm:#64748b;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace}
+body{font-family:var(--sans);background:var(--bg);color:var(--t);line-height:1.7;overflow-x:hidden}
+.bg{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,212,255,.02)1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.02)1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.glow{position:fixed;width:500px;height:500px;border-radius:50%;filter:blur(150px);pointer-events:none}
+.g1{top:-150px;right:-100px;background:radial-gradient(circle,rgba(0,100,255,.05),transparent)}
+.g2{bottom:-150px;left:-100px;background:radial-gradient(circle,rgba(124,58,237,.04),transparent)}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--cya);border-radius:2px}
+
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;padding:.7rem 2rem;background:linear-gradient(180deg,rgba(6,8,15,.95)0%,transparent 100%);display:flex;justify-content:space-between;align-items:center}
+.topbar .back{color:var(--cyd);text-decoration:none;font-size:.8rem;display:flex;align-items:center;gap:.4rem}
+.topbar .back:hover{color:var(--cy)}
+.topbar .title{font-size:.85rem;font-weight:600;background:linear-gradient(135deg,var(--cy),var(--bl));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.sec{z-index:1;max-width:1100px;margin:0 auto;padding:0 2rem 3rem}
+.sec h2{font-size:1.2rem;font-weight:600;margin-bottom:1.5rem;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:.6rem;color:#fff}
+.sec h2 .num{font-size:.6rem;padding:.15rem .5rem;border-radius:100px;font-family:var(--mono)}
+.num-hw{background:rgba(245,158,11,.12);color:var(--am);border:1px solid rgba(245,158,11,.2)}
+.num-sw{background:rgba(0,212,255,.12);color:var(--cyd);border:1px solid rgba(0,212,255,.2)}
+
+.hero{z-index:1;padding:6rem 2rem 3rem;max-width:1000px;margin:0 auto;text-align:center}
+.hero .tag{display:inline-block;font-size:.65rem;letter-spacing:.15em;color:var(--cyd);text-transform:uppercase;padding:.2rem .9rem;border:1px solid var(--cya);border-radius:100px;margin-bottom:.8rem}
+.hero h1{font-size:clamp(1.6rem,3vw,2.5rem);font-weight:700;margin-bottom:.4rem;background:linear-gradient(135deg,#fff 0%,var(--cy) 40%,var(--am) 60%,var(--pu) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--td);font-size:.9rem;font-weight:300}
+
+.diagram{background:var(--c);border:1px solid var(--l);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;overflow-x:auto}
+.diagram .dl{font-size:.7rem;color:var(--tm);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;text-align:center}
+
+.sw-block{background:var(--c);border:1px solid var(--l);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.sw-block .sw-title{font-size:.85rem;font-weight:600;margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}
+.sw-block .sw-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.4rem}
+.sw-block .sw-item{flex:1;min-width:80px;padding:.5rem .7rem;border-radius:8px;text-align:center}
+.sw-block .sw-item .sw-name{font-size:.75rem;font-weight:500}
+.sw-block .sw-item .sw-sub{font-size:.62rem;color:var(--tm);font-family:var(--mono);margin-top:.15rem}
+
+.tbl-wrap{overflow-x:auto;margin-top:.8rem}
+.stbl{width:100%;border-collapse:collapse;font-size:.75rem}
+.stbl th{padding:.35rem .5rem;color:var(--tm);font-weight:500;font-size:.62rem;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid rgba(255,255,255,.05);text-align:left}
+.stbl td{padding:.35rem .5rem;color:var(--td);border-bottom:1px solid rgba(255,255,255,.03)}
+.stbl tr:hover td{color:var(--t)}
+.stbl .hl{color:var(--cy);font-family:var(--mono);font-weight:600}
+
+.note{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.1);border-radius:8px;padding:.6rem 1rem;margin-top:1rem;font-size:.72rem;color:var(--cyd)}
+.note strong{color:var(--cy)}
+
+.foot{z-index:1;text-align:center;padding:2rem;color:var(--tm);font-size:.7rem;border-top:1px solid rgba(255,255,255,.03)}
+
+@media(max-width:768px){.hero{padding:5rem 1rem 2rem}.sec{padding:0 1rem 2rem}}
+</style>
+</head>
+<body>
+<div class="bg"></div><div class="glow g1"></div><div class="glow g2"></div>
+
+<div class="topbar">
+  <a class="back" href="index.html">&#8592; 返回总览</a>
+  <div class="title">硬件设计 &amp; 软件架构</div>
+</div>
+
+<div class="hero">
+  <div class="tag">&#128187; Design Documents</div>
+  <h1>硬件设计 &amp; 软件架构</h1>
+  <p>完整工程级设计图 · 可直接用于PCB Layout和固件开发</p>
+</div>
+
+<!-- ═══════════ HARDWARE ═══════════ -->
+<div class="sec">
+  <h2><span class="num num-hw">HW</span> 硬件原理框图</h2>
+
+  <div class="diagram">
+    <div class="dl">FIG 1 — 硬件系统原理框图（主要元器件 + 接口 + 供电拓扑）</div>
+    <svg viewBox="0 0 1050 520" style="width:100%;height:auto;max-width:1050px;display:block;margin:0 auto">
+      <defs>
+        <lg id="gnd1"><stop offset="0" stop-color="rgba(245,158,11,.18)"/><stop offset="1" stop-color="rgba(245,158,11,.04)"/></lg>
+        <lg id="gnd2"><stop offset="0" stop-color="rgba(0,212,255,.15)"/><stop offset="1" stop-color="rgba(0,212,255,.03)"/></lg>
+        <lg id="gnd3"><stop offset="0" stop-color="rgba(124,58,237,.15)"/><stop offset="1" stop-color="rgba(124,58,237,.03)"/></lg>
+        <lg id="gnd4"><stop offset="0" stop-color="rgba(16,185,129,.15)"/><stop offset="1" stop-color="rgba(16,185,129,.03)"/></lg>
+        <lg id="gnd5"><stop offset="0" stop-color="rgba(239,68,68,.12)"/><stop offset="1" stop-color="rgba(239,68,68,.03)"/></lg>
+        <lg id="gnd6"><stop offset="0" stop-color="rgba(236,72,153,.12)"/><stop offset="1" stop-color="rgba(236,72,153,.03)"/></lg>
+      </defs>
+
+      <!-- ====== Radar Frontend ====== -->
+      <rect x="20" y="30" width="240" height="100" rx="14" fill="url(#gnd1)" stroke="rgba(245,158,11,.3)" stroke-width="1.8"/>
+      <text x="140" y="55" text-anchor="middle" fill="#f59e0b" font-size="14" font-weight="700">Radar Frontend</text>
+      <rect x="35" y="65" width="100" height="50" rx="8" fill="rgba(0,0,0,.3)" stroke="rgba(245,158,11,.2)" stroke-width="1"/>
+      <text x="85" y="86" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="500">TI IWR6843</text>
+      <text x="85" y="103" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">60-64GHz 3T4R</text>
+      <rect x="145" y="65" width="100" height="50" rx="8" fill="rgba(0,0,0,.3)" stroke="rgba(245,158,11,.2)" stroke-width="1"/>
+      <text x="195" y="86" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="500">Infineon BGT60</text>
+      <text x="195" y="103" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">片内天线 备选</text>
+
+      <!-- Arrow: Radar → MCU -->
+      <text x="265" y="82" fill="#64748b" font-size="20">&#8594;</text>
+      <text x="265" y="95" fill="#64748b" font-size="7" font-family="var(--mono)">SPI</text>
+
+      <!-- ====== MCU ====== -->
+      <rect x="290" y="30" width="280" height="100" rx="14" fill="url(#gnd2)" stroke="rgba(0,212,255,.3)" stroke-width="1.8"/>
+      <text x="430" y="55" text-anchor="middle" fill="#00d4ff" font-size="14" font-weight="700">Main MCU · ESP32-S3</text>
+      <text x="430" y="72" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">Xtensa LX7 x2 @240MHz · WiFi b/g/n + BLE 5.0</text>
+      <rect x="305" y="80" width="80" height="38" rx="6" fill="rgba(0,0,0,.3)" stroke="rgba(0,212,255,.15)"/>
+      <text x="345" y="96" text-anchor="middle" fill="#94a3b8" font-size="8">NPU Vector</text>
+      <text x="345" y="110" text-anchor="middle" fill="#64748b" font-size="6" font-family="var(--mono)">0.5 TOPS INT8</text>
+      <rect x="395" y="80" width="80" height="38" rx="6" fill="rgba(0,0,0,.3)" stroke="rgba(0,212,255,.15)"/>
+      <text x="435" y="96" text-anchor="middle" fill="#94a3b8" font-size="8">802.11bgn</text>
+      <text x="435" y="110" text-anchor="middle" fill="#64748b" font-size="6" font-family="var(--mono)">2.4GHz WPA3</text>
+      <rect x="485" y="80" width="70" height="38" rx="6" fill="rgba(0,0,0,.3)" stroke="rgba(0,212,255,.15)"/>
+      <text x="520" y="96" text-anchor="middle" fill="#94a3b8" font-size="8">BLE 5.0</text>
+      <text x="520" y="110" text-anchor="middle" fill="#64748b" font-size="6" font-family="var(--mono)">配网/OOB</text>
+
+      <!-- Arrow: MCU → Memory -->
+      <text x="575" y="75" fill="#64748b" font-size="20">&#8594;</text>
+
+      <!-- ====== Memory ====== -->
+      <rect x="590" y="30" width="200" height="100" rx="14" fill="url(#gnd4)" stroke="rgba(16,185,129,.3)" stroke-width="1.8"/>
+      <text x="690" y="55" text-anchor="middle" fill="#10b981" font-size="14" font-weight="700">Memory</text>
+      <rect x="600" y="65" width="85" height="55" rx="6" fill="rgba(0,0,0,.3)" stroke="rgba(16,185,129,.15)"/>
+      <text x="642" y="85" text-anchor="middle" fill="#94a3b8" font-size="8">PSRAM</text>
+      <text x="642" y="99" text-anchor="middle" fill="#64748b" font-size="6" font-family="var(--mono)">8MB Octal</text>
+      <text x="642" y="112" text-anchor="middle" fill="#64748b" font-size="6" font-family="var(--mono)">~400MB/s</text>
+      <rect x="695" y="65" width="85" height="55" rx="6" fill="rgba(0,0,0,.3)" stroke="rgba(16,185,129,.15)"/>
+      <text x="737" y="85" text-anchor="middle" fill="#94a3b8" font-size="8">NOR Flash</text>
+      <text x="737" y="99" text-anchor="middle" fill="#64748b" font-size="6" font-family="var(--mono)">16MB QSPI</text>
+      <text x="737" y="112" text-anchor="middle" fill="#64748b" font-size="6" font-family="var(--mono)">固件+OTA</text>
+
+      <!-- Arrow: MCU → 4G -->
+      <text x="430" y="140" fill="#64748b" font-size="20">&#8595;</text>
+      <text x="445" y="142" fill="#64748b" font-size="7" font-family="var(--mono)">UART</text>
+
+      <!-- ====== 4G Cat.1 ====== -->
+      <rect x="290" y="160" width="280" height="55" rx="12" fill="url(#gnd3)" stroke="rgba(124,58,237,.3)" stroke-width="1.5"/>
+      <text x="430" y="183" text-anchor="middle" fill="#a78bfa" font-size="12" font-weight="600">4G Cat.1 Module</text>
+      <text x="430" y="200" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">Air780E / EC200U · MQTT · 备用上行通道</text>
+
+      <!-- ====== Power ====== -->
+      <rect x="290" y="230" width="500" height="70" rx="14" fill="url(#gnd5)" stroke="rgba(239,68,68,.25)" stroke-width="1.8"/>
+      <text x="540" y="252" text-anchor="middle" fill="#ef4444" font-size="13" font-weight="700">&#9889; Power Tree</text>
+      <rect x="300" y="260" width="110" height="30" rx="6" fill="rgba(239,68,68,.08)" stroke="rgba(239,68,68,.12)"/>
+      <text x="355" y="280" text-anchor="middle" fill="#94a3b8" font-size="7">USB-PD In</text>
+      <text x="450" y="280" text-anchor="middle" fill="#64748b" font-size="8">&#8594;</text>
+      <rect x="470" y="260" width="90" height="30" rx="6" fill="rgba(239,68,68,.08)" stroke="rgba(239,68,68,.12)"/>
+      <text x="515" y="280" text-anchor="middle" fill="#94a3b8" font-size="7">3.3V LDO</text>
+      <text x="590" y="280" text-anchor="middle" fill="#64748b" font-size="8">&#8594;</text>
+      <rect x="610" y="260" width="80" height="30" rx="6" fill="rgba(239,68,68,.08)" stroke="rgba(239,68,68,.12)"/>
+      <text x="650" y="280" text-anchor="middle" fill="#94a3b8" font-size="7">1.8V LDO</text>
+      <text x="720" y="280" text-anchor="middle" fill="#64748b" font-size="8">&#8594;</text>
+      <rect x="740" y="260" width="40" height="30" rx="6" fill="rgba(239,68,68,.08)" stroke="rgba(239,68,68,.12)"/>
+      <text x="760" y="280" text-anchor="middle" fill="#94a3b8" font-size="7">1.1V</text>
+    </svg>
+  </div>
+
+  <div class="diagram">
+    <div class="dl">FIG 2 — BOM 物料清单</div>
+    <div class="tbl-wrap">
+      <table class="stbl"><tr><th>编号</th><th>元器件</th><th>型号/规格</th><th>封装</th><th>数量</th><th>单价</th><th>用途</th></tr>
+      <tr><td>U1</td><td>雷达芯片</td><td>TI IWR6843AOP</td><td>BGA 161</td><td>1</td><td class="hl">¥105</td><td>60GHz FMCW 3T4R</td></tr>
+      <tr><td>U2</td><td>主MCU</td><td>ESP32-S3-WROOM-1</td><td>Module</td><td>1</td><td class="hl">¥38</td><td>NPU+WiFi+BLE</td></tr>
+      <tr><td>U3</td><td>PSRAM</td><td>ESP-PSRAM64H</td><td>内置模块</td><td>1</td><td class="hl">¥0</td><td>8MB Octal SPI</td></tr>
+      <tr><td>U4</td><td>Flash</td><td>W25Q128JV</td><td>SOP-8</td><td>1</td><td class="hl">¥5</td><td>16MB NOR Flash</td></tr>
+      <tr><td>U5</td><td>4G模块</td><td>Air780E</td><td>LCC 40</td><td>1</td><td class="hl">¥22</td><td>Cat.1 备用上行</td></tr>
+      <tr><td>U6</td><td>LDO 3.3V</td><td>AMS1117-3.3</td><td>SOT-223</td><td>1</td><td class="hl">¥0.8</td><td>MCU供电</td></tr>
+      <tr><td>P1</td><td>USB-C 座</td><td>16P Type-C母座</td><td>TH</td><td>1</td><td class="hl">¥2</td><td>供电+调试</td></tr>
+      <tr><td>LED1</td><td>RGB LED</td><td>WS2812B-2020</td><td>2020</td><td>3</td><td class="hl">¥0.5</td><td>状态指示</td></tr>
+      <tr><td></td><td>PCB</td><td>4层 1.0mm FR4</td><td>86x86mm</td><td>1</td><td class="hl">¥12</td><td>主板</td></tr>
+      <tr><td></td><td>外壳</td><td>ABS 白色注塑</td><td>86盒</td><td>1</td><td class="hl">¥8</td><td>壳体</td></tr>
+      <tr><td></td><td>天线</td><td>PCB板载WIFI天线</td><td>PCB</td><td>1</td><td class="hl">¥0</td><td>2.4GHz</td></tr>
+      <tr><td></td><td>被动</td><td>电阻/电容/电感</td><td>0402</td><td>~30</td><td class="hl">¥2</td><td>匹配+滤波</td></tr>
+      <tr><td></td><td style="color:var(--cy);font-weight:600">合计</td><td></td><td></td><td></td><td class="hl" style="font-weight:700;font-size:1rem">¥195.3</td><td>1ku批量</td></tr>
+      </table>
+    </div>
+    <div class="note"><strong>&#128295;</strong> 量产BOM ¥195.3，符合 <strong>¥180-230</strong> 的预算范围。1ku批量下主要降本空间在雷达芯片（方案二Infineon BGT60可降至¥65-80）。</div>
+  </div>
+
+  <div class="diagram">
+    <div class="dl">FIG 3 — PCB Layout 建议（4层板叠层）</div>
+    <svg viewBox="0 0 800 180" style="width:100%;height:auto;max-width:800px;display:block;margin:0 auto">
+      <defs><lg id="pcb1"><stop offset="0" stop-color="rgba(0,212,255,.15)"/><stop offset="1" stop-color="rgba(0,212,255,.04)"/></lg>
+      <lg id="pcb2"><stop offset="0" stop-color="rgba(16,185,129,.12)"/><stop offset="1" stop-color="rgba(16,185,129,.03)"/></lg>
+      <lg id="pcb3"><stop offset="0" stop-color="rgba(124,58,237,.12)"/><stop offset="1" stop-color="rgba(124,58,237,.03)"/></lg>
+      <lg id="pcb4"><stop offset="0" stop-color="rgba(245,158,11,.12)"/><stop offset="1" stop-color="rgba(245,158,11,.03)"/></lg></defs>
+      <rect x="10" y="10" width="780" height="160" rx="8" fill="rgba(0,0,0,.3)" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+      <text x="400" y="32" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="600">86x86mm · 4层FR4 1.0mm</text>
+      <rect x="30" y="45" width="740" height="25" rx="6" fill="url(#pcb1)" stroke="rgba(0,212,255,.2)"/>
+      <text x="400" y="60" text-anchor="middle" fill="#00d4ff" font-size="9" font-weight="600">L1 · TOP · 信号层 · 射频走线+50 Ohm阻抗匹配 · 天线禁布区</text>
+      <rect x="30" y="75" width="740" height="25" rx="6" fill="url(#pcb4)"/>
+      <text x="400" y="90" text-anchor="middle" fill="#f59e0b" font-size="9" font-weight="600">L2 · GND · 完整地平面 · 雷达/MCU下方不割裂</text>
+      <rect x="30" y="105" width="740" height="25" rx="6" fill="url(#pcb2)"/>
+      <text x="400" y="120" text-anchor="middle" fill="#10b981" font-size="9" font-weight="600">L3 · PWR · 电源分割 · 3.3V/1.8V/1.1V · 宽走线低阻抗</text>
+      <rect x="30" y="135" width="740" height="25" rx="6" fill="url(#pcb3)"/>
+      <text x="400" y="150" text-anchor="middle" fill="#a78bfa" font-size="9" font-weight="600">L4 · BOT · 低速信号层 · I2C/GPIO/LED/4G UART</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ═══════════ SOFTWARE ═══════════ -->
+<div class="sec">
+  <h2><span class="num num-sw">SW</span> 软件架构</h2>
+
+  <div class="diagram">
+    <div class="dl">FIG 4 — 软件分层架构</div>
+    <svg viewBox="0 0 820 380" style="width:100%;height:auto;max-width:820px;display:block;margin:0 auto">
+      <defs><lg id="sw1"><stop offset="0" stop-color="rgba(245,158,11,.14)"/><stop offset="1" stop-color="rgba(245,158,11,.03)"/></lg>
+      <lg id="sw2"><stop offset="0" stop-color="rgba(16,185,129,.14)"/><stop offset="1" stop-color="rgba(16,185,129,.03)"/></lg>
+      <lg id="sw3"><stop offset="0" stop-color="rgba(0,212,255,.14)"/><stop offset="1" stop-color="rgba(0,212,255,.03)"/></lg>
+      <lg id="sw4"><stop offset="0" stop-color="rgba(124,58,237,.14)"/><stop offset="1" stop-color="rgba(124,58,237,.03)"/></lg>
+      <lg id="sw5"><stop offset="0" stop-color="rgba(236,72,153,.12)"/><stop offset="1" stop-color="rgba(236,72,153,.03)"/></lg></defs>
+
+      <!-- Layer markers -->
+      <text x="10" y="30" fill="#64748b" font-size="10" font-family="var(--mono)">应用层</text>
+      <rect x="10" y="35" width="800" height="55" rx="10" fill="url(#sw5)" stroke="rgba(236,72,153,.25)" stroke-width="1.5"/>
+      <rect x="20" y="42" width="180" height="40" rx="8" fill="rgba(0,0,0,.3)" stroke="rgba(236,72,153,.15)"/>
+      <text x="110" y="60" text-anchor="middle" fill="#ec4899" font-size="10" font-weight="600">Inference Scheduler</text>
+      <text x="110" y="74" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">异步多模型调度</text>
+      <rect x="210" y="42" width="170" height="40" rx="8" fill="rgba(0,0,0,.3)" stroke="rgba(236,72,153,.15)"/>
+      <text x="295" y="60" text-anchor="middle" fill="#ec4899" font-size="10" font-weight="600">Alert Engine</text>
+      <text x="295" y="74" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">分级推送 5s/30s/3min</text>
+      <rect x="390" y="42" width="180" height="40" rx="8" fill="rgba(0,0,0,.3)" stroke="rgba(236,72,153,.15)"/>
+      <text x="480" y="60" text-anchor="middle" fill="#ec4899" font-size="10" font-weight="600">OTA Manager</text>
+      <text x="480" y="74" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">A/B分区固件升级</text>
+      <rect x="580" y="42" width="180" height="40" rx="8" fill="rgba(0,0,0,.3)" stroke="rgba(236,72,153,.15)"/>
+      <text x="670" y="60" text-anchor="middle" fill="#ec4899" font-size="10" font-weight="600">Data Logger</text>
+      <text x="670" y="74" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">环形缓冲 60s回放</text>
+
+      <text x="10" y="110" fill="#64748b" font-size="10" font-family="var(--mono)">服务层</text>
+      <rect x="10" y="115" width="800" height="55" rx="10" fill="url(#sw4)" stroke="rgba(124,58,237,.25)" stroke-width="1.5"/>
+      <rect x="20" y="122" width="240" height="40" rx="8" fill="rgba(0,0,0,.3)" stroke="rgba(124,58,237,.15)"/>
+      <text x="140" y="140" text-anchor="middle" fill="#a78bfa" font-size="10" font-weight="600">ONNX Runtime · INT8</text>
+      <text x="140" y="154" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">模型解析·内存管理·NPU后端</text>
+      <rect x="270" y="122" width="240" height="40" rx="8" fill="rgba(0,0,0,.3)" stroke="rgba(124,58,237,.15)"/>
+      <text x="390" y="140" text-anchor="middle" fill="#a78bfa" font-size="10" font-weight="600">Feature Extractor</text>
+      <text x="390" y="154" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">雷达信号→3类特征向量</text>
+      <rect x="520" y="122" width="240" height="40" rx="8" fill="rgba(0,0,0,.3)" stroke="rgba(124,58,237,.15)"/>
+      <text x="640" y="140" text-anchor="middle" fill="#a78bfa" font-size="10" font-weight="600">MQTT/WiFi/BLE Stack</text>
+      <text x="640" y="154" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">QoS1 断线重连 离线缓存</text>
+
+      <text x="10" y="190" fill="#64748b" font-size="10" font-family="var(--mono)">HAL层</text>
+      <rect x="10" y="195" width="800" height="55" rx="10" fill="url(#sw3)" stroke="rgba(0,212,255,.25)" stroke-width="1.5"/>
+      <rect x="20" y="202" width="250" height="40" rx="8" fill="rgba(0,0,0,.3)" stroke="rgba(0,212,255,.15)"/>
+      <text x="145" y="220" text-anchor="middle" fill="#00d4ff" font-size="10" font-weight="600">Radar HAL · SPI DMA</text>
+      <text x="145" y="234" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">20fps点云·FIFO缓冲</text>
+      <rect x="280" y="202" width="250" height="40" rx="8" fill="rgba(0,0,0,.3)" stroke="rgba(0,212,255,.15)"/>
+      <text x="405" y="220" text-anchor="middle" fill="#00d4ff" font-size="10" font-weight="600">NPU HAL · Intrinsic</text>
+      <text x="405" y="234" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">INT8 conv/matmul加速</text>
+      <rect x="540" y="202" width="250" height="40" rx="8" fill="rgba(0,0,0,.3)" stroke="rgba(0,212,255,.15)"/>
+      <text x="665" y="220" text-anchor="middle" fill="#00d4ff" font-size="10" font-weight="600">Power HAL</text>
+      <text x="665" y="234" text-anchor="middle" fill="#64748b" font-size="7" font-family="var(--mono)">DVFS·Sleep·Deep Sleep</text>
+
+      <text x="10" y="270" fill="#64748b" font-size="10" font-family="var(--mono)">RTOS</text>
+      <rect x="10" y="275" width="800" height="45" rx="10" fill="url(#sw2)" stroke="rgba(16,185,129,.25)" stroke-width="1.5"/>
+      <rect x="20" y="282" width="180" height="30" rx="6" fill="rgba(0,0,0,.3)" stroke="rgba(16,185,129,.15)"/>
+      <text x="110" y="300" text-anchor="middle" fill="#10b981" font-size="10" font-weight="600">FreeRTOS 10.6</text>
+      <rect x="210" y="282" width="180" height="30" rx="6" fill="rgba(0,0,0,.3)" stroke="rgba(16,185,129,.15)"/>
+      <text x="300" y="300" text-anchor="middle" fill="#10b981" font-size="10" font-weight="600">5 Priority Tasks</text>
+      <rect x="400" y="282" width="180" height="30" rx="6" fill="rgba(0,0,0,.3)" stroke="rgba(16,185,129,.15)"/>
+      <text x="490" y="300" text-anchor="middle" fill="#10b981" font-size="10" font-weight="600">Watchdog 5s</text>
+      <rect x="590" y="282" width="180" height="30" rx="6" fill="rgba(0,0,0,.3)" stroke="rgba(16,185,129,.15)"/>
+      <text x="680" y="300" text-anchor="middle" fill="#10b981" font-size="10" font-weight="600">H/W Timer Tick</text>
+
+      <text x="10" y="340" fill="#64748b" font-size="10" font-family="var(--mono)">硬件</text>
+      <rect x="10" y="345" width="800" height="30" rx="8" fill="url(#sw1)" stroke="rgba(245,158,11,.25)" stroke-width="1"/>
+      <text x="400" y="364" text-anchor="middle" fill="#f59e0b" font-size="9">ESP32-S3 + IWR6843 + PSRAM 8MB + Flash 16MB + 4G Cat.1 + Type-C PD</text>
+    </svg>
+  </div>
+
+  <div class="diagram">
+    <div class="dl">FIG 5 — FreeRTOS 任务调度图</div>
+    <svg viewBox="0 0 800 200" style="width:100%;height:auto;max-width:800px;display:block;margin:0 auto">
+      <rect x="20" y="20" width="760" height="28" rx="6" fill="rgba(239,68,68,.1)" stroke="rgba(239,68,68,.2)"/>
+      <text x="35" y="38" fill="#ef4444" font-size="9" font-weight="600">T1 · Radar Task</text>
+      <text x="250" y="38" fill="#64748b" font-size="7" font-family="var(--mono)">Prio 5 · 20ms 周期 · SPI DMA采集10KB/帧 · 通知InferenceTask</text>
+      <rect x="20" y="55" width="760" height="28" rx="6" fill="rgba(0,212,255,.08)" stroke="rgba(0,212,255,.15)"/>
+      <text x="35" y="73" fill="#00d4ff" font-size="9" font-weight="600">T2 · Inference Task</text>
+      <text x="270" y="73" fill="#64748b" font-size="7" font-family="var(--mono)">Prio 4 · 事件驱动 · 三级判定流水线 · 结果->AlertTask</text>
+      <rect x="20" y="90" width="760" height="28" rx="6" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.12)"/>
+      <text x="35" y="108" fill="#f59e0b" font-size="9" font-weight="600">T3 · Alert Task</text>
+      <text x="260" y="108" fill="#64748b" font-size="7" font-family="var(--mono)">Prio 3 · MQTT推送 · LED · 蜂鸣器 · 分级升级逻辑</text>
+      <rect x="20" y="125" width="760" height="28" rx="6" fill="rgba(16,185,129,.08)" stroke="rgba(16,185,129,.12)"/>
+      <text x="35" y="143" fill="#10b981" font-size="9" font-weight="600">T4 · Cloud Sync Task</text>
+      <text x="280" y="143" fill="#64748b" font-size="7" font-family="var(--mono)">Prio 2 · 1s周期 · MQTT心跳·统计上报·OTA检查</text>
+      <rect x="20" y="160" width="760" height="28" rx="6" fill="rgba(124,58,237,.08)" stroke="rgba(124,58,237,.12)"/>
+      <text x="35" y="178" fill="#a78bfa" font-size="9" font-weight="600">T5 · IDLE / Watchdog</text>
+      <text x="285" y="178" fill="#64748b" font-size="7" font-family="var(--mono)">Prio 0 · 空闲统计 · 喂狗 · Deep Sleep管理</text>
+    </svg>
+  </div>
+
+  <div class="diagram">
+    <div class="dl">FIG 6 — 数据流 & OTA 流程</div>
+    <svg viewBox="0 0 800 280" style="width:100%;height:auto;max-width:800px;display:block;margin:0 auto">
+      <!-- Data Flow (left) -->
+      <rect x="10" y="10" width="390" height="260" rx="12" fill="rgba(0,0,0,.2)" stroke="rgba(0,212,255,.15)"/>
+      <text x="205" y="35" text-anchor="middle" fill="#00d4ff" font-size="12" font-weight="700">数据流 · Data Pipeline</text>
+      <rect x="25" y="48" width="360" height="30" rx="6" fill="rgba(0,212,255,.06)"/>
+      <text x="205" y="67" text-anchor="middle" fill="#94a3b8" font-size="8">1. Radar SPI DMA &#8594; Ring Buffer 60帧</text>
+      <rect x="25" y="84" width="360" height="30" rx="6" fill="rgba(0,212,255,.06)"/>
+      <text x="205" y="103" text-anchor="middle" fill="#94a3b8" font-size="8">2. Feature Extractor &#8594; 3类特征向量</text>
+      <rect x="25" y="120" width="360" height="30" rx="6" fill="rgba(0,212,255,.06)"/>
+      <text x="205" y="139" text-anchor="middle" fill="#94a3b8" font-size="8">3. CNN Level1+2 &#8594; LSTM Level3 &#8594; 判定结果</text>
+      <rect x="25" y="156" width="360" height="30" rx="6" fill="rgba(0,212,255,.06)"/>
+      <text x="205" y="175" text-anchor="middle" fill="#94a3b8" font-size="8">4. Alert &#8594; MQTT Publish &#8594; 微信服务通知</text>
+      <rect x="25" y="192" width="360" height="30" rx="6" fill="rgba(0,212,255,.06)"/>
+      <text x="205" y="211" text-anchor="middle" fill="#94a3b8" font-size="8">5. 环形缓冲 60s 回放 &#8594; 事后复盘数据</text>
+      <rect x="25" y="228" width="360" height="30" rx="6" fill="rgba(0,212,255,.06)"/>
+      <text x="205" y="247" text-anchor="middle" fill="#94a3b8" font-size="8">6. 匿名化统计 &#8594; 云端 Dashboard</text>
+
+      <!-- OTA Flow (right) -->
+      <rect x="410" y="10" width="380" height="260" rx="12" fill="rgba(0,0,0,.2)" stroke="rgba(16,185,129,.15)"/>
+      <text x="600" y="35" text-anchor="middle" fill="#10b981" font-size="12" font-weight="700">OTA 升级流程</text>
+      <rect x="425" y="48" width="350" height="30" rx="6" fill="rgba(16,185,129,.06)"/>
+      <text x="600" y="67" text-anchor="middle" fill="#94a3b8" font-size="8">1. 云端推送新版本描述 &#8594; 设备查询</text>
+      <rect x="425" y="84" width="350" height="30" rx="6" fill="rgba(16,185,129,.06)"/>
+      <text x="600" y="103" text-anchor="middle" fill="#94a3b8" font-size="8">2. 分区A运行 &#8594; 下载到分区B</text>
+      <rect x="425" y="120" width="350" height="30" rx="6" fill="rgba(16,185,129,.06)"/>
+      <text x="600" y="139" text-anchor="middle" fill="#94a3b8" font-size="8">3. CRC校验 &#8594; 写入Bootloader标记</text>
+      <rect x="425" y="156" width="350" height="30" rx="6" fill="rgba(16,185,129,.06)"/>
+      <text x="600" y="175" text-anchor="middle" fill="#94a3b8" font-size="8">4. 重启 &#8594; Bootloader引导分区B</text>
+      <rect x="425" y="192" width="350" height="30" rx="6" fill="rgba(16,185,129,.06)"/>
+      <text x="600" y="211" text-anchor="middle" fill="#94a3b8" font-size="8">5. 成功 &#8594; 分区B永久生效 | 失败 &#8594; 回滚分区A</text>
+      <rect x="425" y="228" width="350" height="30" rx="6" fill="rgba(16,185,129,.06)"/>
+      <text x="600" y="247" text-anchor="middle" fill="#94a3b8" font-size="8">6. 上报升级结果 &#8594; 云端统计覆盖率</text>
+    </svg>
+  </div>
+
+  <div class="diagram">
+    <div class="dl">FIG 7 — Flash 分区 & Memory Map</div>
+    <svg viewBox="0 0 800 160" style="width:100%;height:auto;max-width:800px;display:block;margin:0 auto">
+      <text x="30" y="20" fill="#64748b" font-size="9" font-family="var(--mono)">0x000000</text>
+      <rect x="30" y="25" width="740" height="16" rx="3" fill="rgba(245,158,11,.15)" stroke="rgba(245,158,11,.2)"/>
+      <text x="400" y="37" text-anchor="middle" fill="#f59e0b" font-size="8">Bootloader 64KB</text>
+      <text x="780" y="48" fill="#64748b" font-size="8" font-family="var(--mono)">0x010000</text>
+      <rect x="30" y="53" width="350" height="16" rx="3" fill="rgba(0,212,255,.15)" stroke="rgba(0,212,255,.2)"/>
+      <text x="205" y="65" text-anchor="middle" fill="#00d4ff" font-size="8">Firmware A 3MB (active)</text>
+      <rect x="420" y="53" width="350" height="16" rx="3" fill="rgba(124,58,237,.15)" stroke="rgba(124,58,237,.2)"/>
+      <text x="595" y="65" text-anchor="middle" fill="#a78bfa" font-size="8">Firmware B 3MB (staging)</text>
+      <text x="780" y="76" fill="#64748b" font-size="8" font-family="var(--mono)">0x700000</text>
+      <rect x="30" y="81" width="370" height="16" rx="3" fill="rgba(16,185,129,.12)" stroke="rgba(16,185,129,.18)"/>
+      <text x="215" y="93" text-anchor="middle" fill="#10b981" font-size="8">NVS + Config 512KB</text>
+      <rect x="440" y="81" width="330" height="16" rx="3" fill="rgba(236,72,153,.1)" stroke="rgba(236,72,153,.15)"/>
+      <text x="605" y="93" text-anchor="middle" fill="#ec4899" font-size="8">Model Weights 2MB</text>
+      <text x="780" y="104" fill="#64748b" font-size="8" font-family="var(--mono)">0xB00000</text>
+      <rect x="30" y="109" width="400" height="16" rx="3" fill="rgba(100,120,150,.08)" stroke="rgba(100,120,150,.12)"/>
+      <text x="230" y="121" text-anchor="middle" fill="#94a3b8" font-size="8">Event Logs + Ring Buffer 2MB</text>
+      <rect x="470" y="109" width="300" height="16" rx="3" fill="rgba(100,120,150,.08)" stroke="rgba(100,120,150,.12)"/>
+      <text x="620" y="121" text-anchor="middle" fill="#94a3b8" font-size="8">Reserved 1.5MB</text>
+      <text x="30" y="145" fill="#64748b" font-size="8" font-family="var(--mono)">PSRAM 8MB</text>
+      <rect x="30" y="150" width="740" height="12" rx="3" fill="rgba(0,212,255,.08)" stroke="rgba(0,212,255,.1)"/>
+      <text x="400" y="159" text-anchor="middle" fill="#00d4ff" font-size="7">Ring Buffer 60帧 · Feature Vectors · ONNX Runtime Workspace · MQTT Tx/Rx Buffers</text>
+    </svg>
+  </div>
+</div>
+
+<footer class="foot">
+  <p>EldCare 银发守护者 · <a href="index.html" style="color:var(--cyd);text-decoration:none">返回总览</a></p>
+  <p style="margin-top:.3rem;font-size:.6rem">&copy; 2025 EldCare · 硬件设计 & 软件架构 v1.0</p>
+</footer>
+</body>
+</html>
