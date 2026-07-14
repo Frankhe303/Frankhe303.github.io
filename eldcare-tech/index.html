@@ -3,696 +3,136 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EldCare · 银发守护者 — 交互式技术白皮书</title>
+<title>EldCare · 银发守护者 — 技术全景</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
-
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--bg-deep:#06080f;--bg-card:rgba(12,20,35,0.85);--bg-card-hover:rgba(18,30,50,0.95);--border-glow:rgba(0,180,255,0.12);--border-active:rgba(0,212,255,0.5);--cyan:#00d4ff;--cyan-dim:rgba(0,212,255,0.6);--cyan-muted:rgba(0,212,255,0.12);--blue:#0088ff;--purple:#7c3aed;--green:#10b981;--green-dim:rgba(16,185,129,0.5);--amber:#f59e0b;--red:#ef4444;--pink:#ec4899;--text:#e2e8f0;--text-dim:#94a3b8;--text-muted:#64748b;--font-sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;--font-mono:'JetBrains Mono','Fira Code',monospace}
+:root{--bg:#06080f;--bg-card:rgba(12,20,35,.85);--bg-hover:rgba(18,30,50,.95);--line:rgba(0,180,255,.12);--line-act:rgba(0,212,255,.5);--cyan:#00d4ff;--cyand:rgba(0,212,255,.6);--cyans:rgba(0,212,255,.12);--blue:#0088ff;--purple:#7c3aed;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--txt:#e2e8f0;--txtd:#94a3b8;--txtm:#64748b;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace}
 html{scroll-behavior:smooth}
-body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text);line-height:1.6;overflow-x:hidden}
-.bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,212,255,0.03)1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03)1px,transparent 1px);background-size:60px 60px;pointer-events:none}
-.bg-glow{position:fixed;width:700px;height:700px;border-radius:50%;filter:blur(150px);pointer-events:none;z-index:0;animation:gp 8s ease-in-out infinite alternate}
-.bg-glow-1{top:-250px;right:-200px;background:radial-gradient(circle,rgba(0,100,255,0.06),transparent)}
-.bg-glow-2{bottom:-250px;left:-200px;background:radial-gradient(circle,rgba(124,58,237,0.05),transparent);animation-delay:-4s}
+body{font-family:var(--sans);background:var(--bg);color:var(--txt);line-height:1.6;overflow-x:hidden}
+.bg{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,212,255,.03)1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03)1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.glow{position:fixed;width:600px;height:600px;border-radius:50%;filter:blur(150px);pointer-events:none;z-index:0;animation:gp 8s ease infinite alternate}
+.g1{top:-200px;right:-200px;background:radial-gradient(circle,rgba(0,100,255,.06),transparent)}
+.g2{bottom:-200px;left:-200px;background:radial-gradient(circle,rgba(124,58,237,.05),transparent);animation-delay:-4s}
 @keyframes gp{0%,100%{opacity:.5}50%{opacity:1}}
 ::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:var(--bg-deep)}
-::-webkit-scrollbar-thumb{background:var(--cyan-muted);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:var(--cyan-dim)}
-
-.hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:2rem}
-.hero-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem 1.1rem;border-radius:100px;border:1px solid var(--cyan-muted);background:rgba(0,212,255,.04);font-size:.75rem;color:var(--cyan-dim);letter-spacing:.12em;margin-bottom:1.8rem;text-transform:uppercase}
-.hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:dp 2s ease-in-out infinite}
-@keyframes dp{0%,100%{opacity:1;box-shadow:0 0 6px var(--green)}50%{opacity:.4;box-shadow:0 0 0 transparent}}
-.hero h1{font-size:clamp(2.2rem,6vw,4.5rem);font-weight:800;line-height:1.1;margin-bottom:.8rem;background:linear-gradient(135deg,#fff 0%,var(--cyan) 40%,var(--blue) 70%,var(--purple) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-sub{font-size:clamp(.9rem,1.5vw,1.2rem);color:var(--text-dim);max-width:640px;margin-bottom:2rem;font-weight:300}
-.hero-stats{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-bottom:2.5rem}
-.hero-stat{background:var(--bg-card);border:1px solid var(--border-glow);border-radius:12px;padding:.8rem 1.5rem;backdrop-filter:blur(20px);min-width:100px}
-.hero-stat .num{font-size:1.4rem;font-weight:700;color:var(--cyan);font-family:var(--font-mono)}
-.hero-stat .label{font-size:.7rem;color:var(--text-muted);margin-top:.15rem;text-transform:uppercase;letter-spacing:.05em}
-.scroll-ind{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.4rem;color:var(--text-muted);font-size:.65rem;letter-spacing:.1em;animation:bc 2s ease-in-out infinite}
-@keyframes bc{0%,100%{transform:translateX(-50%)translateY(0)}50%{transform:translateX(-50%)translateY(8px)}}
-.scroll-ind .arrow{width:18px;height:18px;border-right:2px solid var(--text-muted);border-bottom:2px solid var(--text-muted);transform:rotate(45deg)}
-
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--cyans);border-radius:3px}
 nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:.8rem 2rem;background:linear-gradient(180deg,rgba(6,8,15,.95)0%,transparent 100%);display:flex;justify-content:space-between;align-items:center}
 nav .logo{font-weight:700;font-size:1rem;background:linear-gradient(135deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-nav .nav-links{display:flex;gap:.6rem;flex-wrap:wrap}
-nav .nav-links a{color:var(--text-dim);text-decoration:none;font-size:.75rem;transition:color .3s;padding:.25rem .5rem;border-radius:5px}
-nav .nav-links a:hover{color:var(--cyan);background:var(--cyan-muted)}
+.hero{z-index:1;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:2rem}
+.hero h1{font-size:clamp(2rem,5vw,4rem);font-weight:800;line-height:1.1;margin-bottom:.8rem;background:linear-gradient(135deg,#fff 0%,var(--cyan) 40%,var(--blue) 70%,var(--purple) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:clamp(.9rem,1.5vw,1.2rem);color:var(--txtd);max-width:600px;margin-bottom:2rem;font-weight:300}
+.hero .stats{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-bottom:1.5rem}
+.hero .stat{background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:.7rem 1.3rem;min-width:90px}
+.hero .stat .n{font-size:1.3rem;font-weight:700;color:var(--cyan);font-family:var(--mono)}
+.hero .stat .l{font-size:.65rem;color:var(--txtm);margin-top:.1rem;text-transform:uppercase;letter-spacing:.05em}
+.hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);color:var(--txtm);font-size:.65rem;letter-spacing:.1em;animation:bc 2s ease infinite}
+@keyframes bc{0%,100%{transform:translateX(-50%)translateY(0)}50%{transform:translateX(-50%)translateY(8px)}}
 
-.section{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:5rem 2rem}
-.section-header{margin-bottom:2.5rem;text-align:center}
-.section-header .tag{display:inline-block;font-size:.65rem;letter-spacing:.15em;color:var(--cyan-dim);text-transform:uppercase;padding:.2rem .9rem;border:1px solid var(--cyan-muted);border-radius:100px;margin-bottom:.8rem}
-.section-header h2{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;margin-bottom:.4rem}
-.section-header p{color:var(--text-dim);max-width:560px;margin:0 auto;font-weight:300;font-size:.9rem}
+.section{z-index:1;max-width:1200px;margin:0 auto;padding:5rem 2rem}
+.section h2{text-align:center;font-size:clamp(1.5rem,2.5vw,2rem);font-weight:700;margin-bottom:3rem}
+.section h2 small{display:block;font-size:.8rem;font-weight:300;color:var(--txtd);margin-top:.3rem}
 
-/* ═══ EXPANDABLE CARDS ═══ */
-.exp-card{background:var(--bg-card);border:1px solid var(--border-glow);border-radius:16px;margin-bottom:1rem;overflow:hidden;transition:all .4s cubic-bezier(.16,1,.3,1);backdrop-filter:blur(20px)}
-.exp-card:hover{border-color:rgba(0,212,255,.25)}
-.exp-card-header{padding:1.2rem 1.5rem;cursor:pointer;display:flex;align-items:center;gap:1rem;user-select:none;-webkit-tap-highlight-color:transparent;transition:background .3s}
-.exp-card-header:hover{background:rgba(0,212,255,.03)}
-.exp-card-header .ec-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
-.exp-card-header .ec-info{flex:1;min-width:0}
-.exp-card-header .ec-info h3{font-size:.95rem;font-weight:600}
-.exp-card-header .ec-info .ec-brief{font-size:.78rem;color:var(--text-dim);margin-top:.1rem}
-.exp-card-header .ec-arrow{font-size:1rem;color:var(--text-muted);transition:transform .4s cubic-bezier(.16,1,.3,1);flex-shrink:0}
-.exp-card.open .ec-arrow{transform:rotate(180deg)}
-.exp-card-body{max-height:0;overflow:hidden;transition:max-height .6s cubic-bezier(.16,1,.3,1),padding .4s}
-.exp-card.open .exp-card-body{max-height:3000px}
-.exp-card-body-inner{padding:0 1.5rem 1.5rem;border-top:1px solid rgba(255,255,255,.04)}
-.exp-card-body-inner>*{margin-top:1rem}
-.exp-card-body-inner h4{font-size:.85rem;font-weight:600;color:var(--text-dim)}
-.exp-card-body-inner p{font-size:.8rem;color:var(--text-dim);line-height:1.7}
-.exp-card-body-inner .spec-row{display:flex;gap:.8rem;flex-wrap:wrap;margin:.5rem 0}
-.exp-card-body-inner .spec-item{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.08);border-radius:8px;padding:.5rem .8rem;flex:1;min-width:100px}
-.exp-card-body-inner .spec-item .s-label{font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
-.exp-card-body-inner .spec-item .s-val{font-size:.85rem;font-weight:600;color:var(--text);font-family:var(--font-mono);margin-top:.15rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
+.card{background:var(--bg-card);border:1px solid var(--line);border-radius:16px;padding:1.5rem;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:all .4s;position:relative;overflow:hidden;cursor:pointer}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyans),transparent);opacity:0;transition:opacity .4s}
+.card:hover{background:var(--bg-hover);border-color:var(--line-act);transform:translateY(-4px);box-shadow:0 12px 50px rgba(0,212,255,.08)}
+.card:hover::before{opacity:1}
+.card .icon{font-size:2rem;margin-bottom:.5rem}
+.card h3{font-size:1.1rem;font-weight:600;margin-bottom:.4rem}
+.card .brief{font-size:.82rem;color:var(--txtd);line-height:1.5;flex:1}
+.card .meta{display:flex;gap:.5rem;margin-top:.8rem;font-size:.7rem;font-family:var(--mono);color:var(--txtm)}
+.card .arrow{text-align:right;margin-top:.8rem;color:var(--cyand);font-size:.85rem;opacity:0;transition:opacity .4s}
+.card:hover .arrow{opacity:1}
+.card:nth-child(1){border-left:2px solid var(--cyan)}
+.card:nth-child(2){border-left:2px solid var(--green)}
+.card:nth-child(3){border-left:2px solid var(--red)}
+.card:nth-child(4){border-left:2px solid var(--purple)}
+.card:nth-child(5){border-left:2px solid var(--amber)}
+.card:nth-child(6){border-left:2px solid var(--blue)}
 
-.icon-cyan{background:rgba(0,212,255,.12);color:var(--cyan)}
-.icon-green{background:rgba(16,185,129,.12);color:var(--green)}
-.icon-purple{background:rgba(124,58,237,.12);color:var(--purple)}
-.icon-amber{background:rgba(245,158,11,.12);color:var(--amber)}
-.icon-red{background:rgba(239,68,68,.12);color:var(--red)}
-.icon-pink{background:rgba(236,72,153,.12);color:var(--pink)}
-
-/* ═══ TABS inside expand ═══ */
-.tabs{display:flex;gap:.3rem;flex-wrap:wrap;margin:.5rem 0}
-.tab-btn{padding:.3rem .8rem;font-size:.72rem;border-radius:6px;border:1px solid rgba(255,255,255,.06);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .3s;font-family:var(--font-sans)}
-.tab-btn:hover{border-color:var(--cyan-muted);color:var(--text-dim)}
-.tab-btn.active{background:rgba(0,212,255,.1);border-color:var(--cyan-dim);color:var(--cyan)}
-.tab-content{display:none;margin-top:.5rem}
-.tab-content.active{display:block}
-
-.table-wrap{overflow-x:auto;margin:.5rem 0}
-.mini-table{width:100%;border-collapse:collapse;font-size:.75rem}
-.mini-table th{padding:.4rem .6rem;color:var(--text-muted);font-weight:500;font-size:.65rem;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid rgba(255,255,255,.05);text-align:left}
-.mini-table td{padding:.4rem .6rem;color:var(--text-dim);border-bottom:1px solid rgba(255,255,255,.03)}
-.mini-table tr:hover td{color:var(--text)}
-.mini-table .hl{color:var(--cyan);font-weight:600}
-
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.6rem}
-.stat-box{text-align:center;padding:.6rem;background:rgba(0,0,0,.2);border-radius:8px;border:1px solid rgba(255,255,255,.04)}
-.stat-box .s-num{font-family:var(--font-mono);font-size:1.3rem;font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.stat-box .s-lbl{font-size:.65rem;color:var(--text-muted);margin-top:.1rem}
-
-.arch{display:flex;flex-direction:column;gap:.5rem;margin:1rem 0}
-.arch-layer{border-radius:10px;padding:.8rem 1rem;border:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.2)}
-.arch-layer .al-label{font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
-.arch-layer .al-blocks{display:flex;flex-wrap:wrap;gap:.4rem}
-.arch-layer .al-blk{padding:.35rem .7rem;border-radius:6px;font-size:.72rem;border:1px solid rgba(255,255,255,.05);color:var(--text-dim);text-align:center;flex:1;min-width:60px;transition:all .3s}
-.arch-layer .al-blk:hover{background:rgba(0,212,255,.05);color:var(--text)}
-.arch-layer .al-blk .ab-sub{font-size:.6rem;color:var(--text-muted);font-family:var(--font-mono);margin-top:.15rem}
-.arch-arrow{text-align:center;color:var(--text-muted);font-size:.6rem;font-family:var(--font-mono)}
-.tag-chip{display:inline-block;font-size:.6rem;padding:.12rem .5rem;border-radius:100px;margin:.15rem;font-family:var(--font-mono)}
-.tag-cyan{background:rgba(0,212,255,.08);color:var(--cyan-dim);border:1px solid rgba(0,212,255,.12)}
-.tag-green{background:rgba(16,185,129,.08);color:var(--green-dim);border:1px solid rgba(16,185,129,.12)}
-.tag-purple{background:rgba(124,58,237,.08);color:#a78bfa;border:1px solid rgba(124,58,237,.12)}
-.tag-amber{background:rgba(245,158,11,.08);color:var(--amber);border:1px solid rgba(245,158,11,.12)}
-
-.footer{position:relative;z-index:1;text-align:center;padding:3rem 2rem;color:var(--text-muted);font-size:.75rem;border-top:1px solid rgba(255,255,255,.03)}
-.footer a{color:var(--cyan-dim);text-decoration:none}
-.footer a:hover{color:var(--cyan)}
-
-@media(max-width:768px){.section{padding:3rem 1rem}.exp-card-header{padding:1rem}.exp-card-body-inner{padding:0 1rem 1rem}nav .nav-links{display:none}.hero h1{font-size:1.8rem}}
+.foot{z-index:1;text-align:center;padding:3rem 2rem;color:var(--txtm);font-size:.75rem;border-top:1px solid rgba(255,255,255,.03)}
+@media(max-width:768px){.section{padding:3rem 1rem}}
 </style>
 </head>
 <body>
+<div class="bg"></div>
+<div class="glow g1"></div>
+<div class="glow g2"></div>
 
-<div class="bg-grid"></div>
-<div class="bg-glow bg-glow-1"></div>
-<div class="bg-glow bg-glow-2"></div>
+<nav><div class="logo">&#9670; EldCare</div></nav>
 
-<nav>
-  <div class="logo">&#9670; EldCare · 交互式技术白皮书</div>
-  <div class="nav-links">
-    <a href="#arch">系统架构</a>
-    <a href="#radar">雷达技术</a>
-    <a href="#edge">边缘AI</a>
-    <a href="#models">AI模型</a>
-    <a href="#data">数据策略</a>
-  </div>
-</nav>
-
-<!-- ═══════════════ HERO ═══════════════ -->
 <section class="hero">
-  <div class="hero-badge">&#9889; 点击卡片展开技术细节</div>
-  <h1>银发守护者<br>交互式技术全景</h1>
-  <p class="hero-sub">非接触式AI生命体征监测 · 点击每个模块探索深层技术细节</p>
-  <div class="hero-stats">
-    <div class="hero-stat"><div class="num">60<span style="font-size:.8rem;font-weight:400">GHz</span></div><div class="label">雷达频率</div></div>
-    <div class="hero-stat"><div class="num">&lt;50<span style="font-size:.8rem;font-weight:400">ms</span></div><div class="label">推理延迟</div></div>
-    <div class="hero-stat"><div class="num">&lt;500<span style="font-size:.8rem;font-weight:400">KB</span></div><div class="label">模型总大小</div></div>
-    <div class="hero-stat"><div class="num">96.8<span style="font-size:.8rem;font-weight:400">%</span></div><div class="label">召回率</div></div>
-    <div class="hero-stat"><div class="num">&#165;180</div><div class="label">BOM成本</div></div>
+  <h1>银发守护者 · 技术全景</h1>
+  <p>非接触式AI生命体征监测系统 · 点击探索每一项核心技术的深度细节</p>
+  <div class="stats">
+    <div class="stat"><div class="n">60<span style="font-size:.8rem;font-weight:400">GHz</span></div><div class="l">雷达频率</div></div>
+    <div class="stat"><div class="n">&lt;50<span style="font-size:.8rem;font-weight:400">ms</span></div><div class="l">推理延迟</div></div>
+    <div class="stat"><div class="n">&lt;500KB</div><div class="l">模型大小</div></div>
+    <div class="stat"><div class="n">96.8%</div><div class="l">召回率</div></div>
   </div>
-  <div class="scroll-ind"><span>点击卡片 · 探索细节</span><div class="arrow"></div></div>
+  <div class="hint">点击下方卡片 &#8595; 探索深度技术细节</div>
 </section>
 
-<!-- ═══════════════ 1. SYSTEM ARCH ═══════════════ -->
-<section class="section" id="arch">
-  <div class="section-header">
-    <div class="tag">&#9654; 点击展开</div>
-    <h2>全栈系统架构</h2>
-    <p>从60GHz雷达信号采集到云端管理平台，全链路本地化边缘AI推理</p>
-  </div>
+<section class="section">
+  <h2>核心技术 <small>点击每一项进入专属详情页 · 包含原理图 · 参数 · 数据指标</small></h2>
+  <div class="cards">
 
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-cyan">&#127760;</div>
-      <div class="ec-info">
-        <h3>系统拓扑总览</h3>
-        <div class="ec-brief">云端 → 边端 → 感知层 · 三层架构全链路</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <div class="arch">
-          <div class="arch-layer" style="border-color:rgba(124,58,237,.2)">
-            <div class="al-label"><span style="color:var(--purple)">&#9729;</span> 云端 · EldCare Cloud</div>
-            <div class="al-blocks">
-              <div class="al-blk" style="border-color:rgba(124,58,237,.15)"><div>设备管理</div><div class="ab-sub">注册·OTA·状态</div></div>
-              <div class="al-blk" style="border-color:rgba(124,58,237,.15)"><div>实时看板</div><div class="ab-sub">楼层总览·趋势</div></div>
-              <div class="al-blk" style="border-color:rgba(124,58,237,.15)"><div>告警引擎</div><div class="ab-sub">分级推送·升级</div></div>
-              <div class="al-blk" style="border-color:rgba(124,58,237,.15)"><div>模型OTA</div><div class="ab-sub">远程升级·A/B</div></div>
-            </div>
-          </div>
-          <div class="arch-arrow">&#11015; 4G Cat.1 / Wi-Fi · MQTT &#11015;</div>
-          <div class="arch-layer" style="border-color:rgba(0,212,255,.2)">
-            <div class="al-label"><span style="color:var(--cyan)">&#127968;</span> 边端 · EldCare 监测器</div>
-            <div class="al-blocks">
-              <div class="al-blk" style="border-color:rgba(0,212,255,.15)"><div>&#128250; 60GHz雷达</div><div class="ab-sub">IWR6843 3T4R</div></div>
-              <div class="al-blk" style="border-color:rgba(0,212,255,.15)"><div>&#129504; AI推理引擎</div><div class="ab-sub">ONNX INT8</div></div>
-              <div class="al-blk" style="border-color:rgba(0,212,255,.15)"><div>&#128279; 通信模块</div><div class="ab-sub">WiFi+4G双模</div></div>
-              <div class="al-blk" style="border-color:rgba(0,212,255,.15)"><div>&#128274; 全本地推理</div><div class="ab-sub">数据不上云</div></div>
-            </div>
-          </div>
-          <div class="arch-arrow">&#11015; 本地推理 · &lt;50ms/帧 &#11015;</div>
-          <div class="arch-layer" style="border-color:rgba(16,185,129,.2)">
-            <div class="al-label"><span style="color:var(--green)">&#128250;</span> 感知层 · 60GHz FMCW雷达</div>
-            <div class="al-blocks">
-              <div class="al-blk" style="border-color:rgba(16,185,129,.15)"><div>FMCW波形</div><div class="ab-sub">60-64GHz</div></div>
-              <div class="al-blk" style="border-color:rgba(16,185,129,.15)"><div>3T4R MIMO</div><div class="ab-sub">12通道</div></div>
-              <div class="al-blk" style="border-color:rgba(16,185,129,.15)"><div>点云生成</div><div class="ab-sub">4维点云</div></div>
-              <div class="al-blk" style="border-color:rgba(16,185,129,.15)"><div>目标分离</div><div class="ab-sub">DBSCAN+卡尔曼</div></div>
-            </div>
-          </div>
-        </div>
-        <p>所有AI推理在边缘端完成，原始雷达数据不出设备。仅告警事件和匿名化统计信息上报云端。端到端延迟 &lt;2秒（含本地推理和无线传输）。单台监测器整机功耗 &lt;1.5W。</p>
-      </div>
-    </div>
-  </div>
+    <a href="detail.html?s=radar" class="card">
+      <div class="icon">&#128250;</div>
+      <h3>60GHz毫米波雷达</h3>
+      <div class="brief">FMCW调频连续波 · 3T4R MIMO · 3.75cm分辨率 · 三芯片选型对比 · 射频策略</div>
+      <div class="meta"><span>&#128200; 频谱图</span><span>&#128202; 对比表</span></div>
+      <div class="arrow">&#8594; 探索雷达技术</div>
+    </a>
 
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-green">&#128200;</div>
-      <div class="ec-info">
-        <h3>数据推理流水线</h3>
-        <div class="ec-brief">从雷达波到告警的全链路处理流程 · 6级流水线</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <div style="display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center">
-          <div class="spec-item" style="min-width:80px;text-align:center"><div class="s-label">Step 1</div><div style="font-size:1.2rem">&#128250;</div><div class="s-val" style="font-size:.75rem">雷达采集</div><div style="font-size:.6rem;color:var(--text-muted)">20fps · 点云</div></div>
-          <div style="color:var(--cyan-dim);font-size:1rem;display:flex;align-items:center">&#8594;</div>
-          <div class="spec-item" style="min-width:80px;text-align:center"><div class="s-label">Step 2</div><div style="font-size:1.2rem">&#128270;</div><div class="s-val" style="font-size:.75rem">目标检测</div><div style="font-size:.6rem;color:var(--text-muted)">CFAR+DBSCAN</div></div>
-          <div style="color:var(--cyan-dim);font-size:1rem;display:flex;align-items:center">&#8594;</div>
-          <div class="spec-item" style="min-width:80px;text-align:center"><div class="s-label">Step 3</div><div style="font-size:1.2rem">&#128200;</div><div class="s-val" style="font-size:.75rem">特征提取</div><div style="font-size:.6rem;color:var(--text-muted)">运动·形态·时序</div></div>
-          <div style="color:var(--cyan-dim);font-size:1rem;display:flex;align-items:center">&#8594;</div>
-          <div class="spec-item" style="min-width:80px;text-align:center"><div class="s-label">Step 4</div><div style="font-size:1.2rem">&#129504;</div><div class="s-val" style="font-size:.75rem">三级判定</div><div style="font-size:.6rem;color:var(--text-muted)">CNN+LSTM</div></div>
-          <div style="color:var(--cyan-dim);font-size:1rem;display:flex;align-items:center">&#8594;</div>
-          <div class="spec-item" style="min-width:80px;text-align:center"><div class="s-label">Step 5</div><div style="font-size:1.2rem">&#128276;</div><div class="s-val" style="font-size:.75rem">告警推送</div><div style="font-size:.6rem;color:var(--text-muted)">微信·短信</div></div>
-        </div>
-        <p>全流水线优化目标：单帧采集→推理 50ms以内，从跌倒发生到告警推送端到端 &lt;2秒。异步流水线设计，采集与推理并行执行。</p>
-      </div>
-    </div>
+    <a href="detail.html?s=arch" class="card">
+      <div class="icon">&#127760;</div>
+      <h3>全栈系统架构</h3>
+      <div class="brief">云端→边端→感知层三层架构 · 数据流水线 · MQTT通信 · OTA升级链路</div>
+      <div class="meta"><span>&#128187; 架构图</span><span>&#128279; 数据流</span></div>
+      <div class="arrow">&#8594; 探索系统架构</div>
+    </a>
+
+    <a href="detail.html?s=fallnet" class="card">
+      <div class="icon">&#128680;</div>
+      <h3>FallNet · 跌倒检测</h3>
+      <div class="brief">1D CNN + BiLSTM · 三阶段时序检测 · 三级分级判定 · F1 0.951</div>
+      <div class="meta"><span>&#129504; 模型架构</span><span>&#128202; 性能指标</span></div>
+      <div class="arrow">&#8594; 探索FallNet</div>
+    </a>
+
+    <a href="detail.html?s=vitalnet" class="card">
+      <div class="icon">&#10084;&#65039;</div>
+      <h3>生命体征模型族</h3>
+      <div class="brief">VitalNet呼吸心率 · BedNet在床检测 · SleepNet睡眠分期 · 四模型协同</div>
+      <div class="meta"><span>&#128200; 时序图</span><span>&#128202; 指标表</span></div>
+      <div class="arrow">&#8594; 探索模型族</div>
+    </a>
+
+    <a href="detail.html?s=data" class="card">
+      <div class="icon">&#128202;</div>
+      <h3>三阶段数据策略</h3>
+      <div class="brief">合成→实验室→真实环境 · 数据量10万+ · 模型精度演进 · 冷启动策略</div>
+      <div class="meta"><span>&#128197; 时间线</span><span>&#128202; 精度曲线</span></div>
+      <div class="arrow">&#8594; 探索数据策略</div>
+    </a>
+
+    <a href="detail.html?s=specs" class="card">
+      <div class="icon">&#128295;</div>
+      <h3>完整技术规格</h3>
+      <div class="brief">射频参数 · 边缘算力 · 通信协议 · 结构安装 · 竞品对比 · 性能总览</div>
+      <div class="meta"><span>&#128196; 参数表</span><span>&#128200; 对比图</span></div>
+      <div class="arrow">&#8594; 查看完整规格</div>
+    </a>
+
   </div>
 </section>
 
-<!-- ═══════════════ 2. RADAR ═══════════════ -->
-<section class="section" id="radar" style="background:linear-gradient(180deg,transparent 0%,rgba(0,100,255,.015) 50%,transparent 100%)">
-  <div class="section-header">
-    <div class="tag">&#9654; 点击展开</div>
-    <h2>60GHz毫米波雷达技术</h2>
-    <p>3发4收MIMO · 3.75cm分辨率 · 四维点云感知</p>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-cyan">&#128250;</div>
-      <div class="ec-info">
-        <h3>FMCW 雷达工作原理</h3>
-        <div class="ec-brief">调频连续波 · 60-64GHz · 4GHz扫频带宽</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <p>雷达发射线性调频连续波（FMCW），信号频率在60-64GHz范围内线性扫描。回波信号与发射信号混频后产生中频信号，经ADC采样形成基带复数I/Q数据。</p>
-        <div class="tabs">
-          <div class="tab-btn active" data-tab="rd-signal">信号处理</div>
-          <div class="tab-btn" data-tab="rd-params">关键参数</div>
-        </div>
-        <div id="rd-signal" class="tab-content active">
-          <div class="spec-row">
-            <div class="spec-item"><div class="s-label">距离-FFT</div><div class="s-val">3.75cm分辨率</div><div style="font-size:.6rem;color:var(--text-muted)">对每个chirp做FFT</div></div>
-            <div class="spec-item"><div class="s-label">多普勒-FFT</div><div class="s-val">速度估计</div><div style="font-size:.6rem;color:var(--text-muted)">跨chirp的FFT</div></div>
-            <div class="spec-item"><div class="s-label">角度-FFT</div><div class="s-val">~10&#176;分辨率</div><div style="font-size:.6rem;color:var(--text-muted)">跨天线通道</div></div>
-            <div class="spec-item"><div class="s-label">输出</div><div class="s-val">四维点云</div><div style="font-size:.6rem;color:var(--text-muted)">r/v/&#952;/&#966;</div></div>
-          </div>
-        </div>
-        <div id="rd-params" class="tab-content">
-          <div class="table-wrap">
-            <table class="mini-table"><tr><th>参数</th><th>数值</th><th>说明</th></tr><tr><td>起始频率</td><td>60 GHz</td><td>ISM频段</td></tr><tr><td>扫频带宽</td><td>4 GHz</td><td>决定距离分辨率</td></tr><tr><td>距离分辨率</td><td>3.75 cm</td><td>可分辨人体不同部位</td></tr><tr><td>帧率</td><td>20 fps</td><td>实时性要求</td></tr><tr><td>天线阵列</td><td>3T4R</td><td>12通道虚拟MIMO</td></tr></table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-green">&#128208;</div>
-      <div class="ec-info">
-        <h3>3T4R MIMO 虚拟阵列</h3>
-        <div class="ec-brief">时分复用MIMO · 12通道 · 高角度分辨率</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <p>通过时分复用MIMO技术，3个发射天线和4个接收天线可形成12通道虚拟天线阵列。相比单通道方案，角度分辨率从约60&#176;提升到约10&#176;，可在标准双人间（床距1.5-2m）中精确区分两床老人。</p>
-        <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
-          <div class="stat-box"><div class="s-num">12</div><div class="s-lbl">虚拟通道</div></div>
-          <div class="stat-box"><div class="s-num">~10&#176;</div><div class="s-lbl">角度分辨率</div></div>
-          <div class="stat-box"><div class="s-num">3T4R</div><div class="s-lbl">天线配置</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-purple">&#127919;</div>
-      <div class="ec-info">
-        <h3>多目标分离与追踪</h3>
-        <div class="ec-brief">DBSCAN聚类 · 卡尔曼滤波 · 双人间优化</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
-          <div class="stat-box"><div class="s-num">DBSCAN</div><div class="s-lbl">聚类算法</div></div>
-          <div class="stat-box"><div class="s-num">&gt;0.5m</div><div class="s-lbl">距离差阈值</div></div>
-          <div class="stat-box"><div class="s-num">3帧</div><div class="s-lbl">追踪恢复</div></div>
-        </div>
-        <p>基于DBSCAN聚类的目标分离算法，距离差>0.5m或角度差>10&#176;判定为不同目标。每个目标分配独立Track ID，通过扩展卡尔曼滤波进行连续帧间的目标关联与追踪，丢帧3帧内可恢复。&#9888; Phase 1仅支持单床，双人间功能Phase 2上线。</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-amber">&#9888;</div>
-      <div class="ec-info">
-        <h3>芯片选型与射频策略</h3>
-        <div class="ec-brief">TI IWR6843 vs Infineon BGT60TR13C · 射频风险控制</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <div class="tabs">
-          <div class="tab-btn active" data-tab="chip-compare">芯片对比</div>
-          <div class="tab-btn" data-tab="chip-strategy">选型策略</div>
-          <div class="tab-btn" data-tab="rf-risk">射频风险</div>
-        </div>
-        <div id="chip-compare" class="tab-content active">
-          <div class="table-wrap">
-            <table class="mini-table"><tr><th>参数</th><th>TI IWR6843</th><th style="color:var(--cyan)">&#11088; BGT60TR13C</th><th>Acconeer A111</th></tr><tr><td>通道</td><td>3T4R</td><td>1T1R</td><td>1T1R</td></tr><tr><td>距离</td><td class="hl">0-10m</td><td>0-5m</td><td class="hl">0-15m</td></tr><tr><td>价格(1ku)</td><td>&#165;105-120</td><td class="hl">&#165;65-80</td><td>&#165;90-110</td></tr><tr><td>天线</td><td>需外置</td><td class="hl">片内集成</td><td>需外置</td></tr><tr><td>成熟度</td><td class="hl">&#11088;&#11088;&#11088;&#11088;&#11088;</td><td>&#11088;&#11088;&#11088;&#11088;</td><td>&#11088;&#11088;&#11088;</td></tr></table>
-          </div>
-        </div>
-        <div id="chip-strategy" class="tab-content">
-          <p><strong>Phase 1 原型：</strong>TI IWR6843开发套件（&#165;1,500/套）<br>理由：文档最全，4T3R性能最强</p>
-          <p><strong>Phase 2 量产：</strong>优先Infineon BGT60TR13C（集成天线降低射频门槛）<br>备选TI IWR6843（多通道性能更强）</p>
-        </div>
-        <div id="rf-risk" class="tab-content">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
-            <div class="spec-item"><div class="s-label">风险</div><div class="s-val" style="font-size:.72rem">天线设计</div><div style="font-size:.6rem;color:var(--text-muted)">Phase 2外包&#165;5-8万</div></div>
-            <div class="spec-item"><div class="s-label">风险</div><div class="s-val" style="font-size:.72rem">整机认证</div><div style="font-size:.6rem;color:var(--text-muted)">SRRC+CE+FCC</div></div>
-            <div class="spec-item"><div class="s-label">缓解</div><div class="s-val" style="font-size:.72rem">选BGT60TR13C</div><div style="font-size:.6rem;color:var(--text-muted)">片内集成就无需天线设计</div></div>
-            <div class="spec-item"><div class="s-label">缓解</div><div class="s-val" style="font-size:.72rem">Phase 1参考设计</div><div style="font-size:.6rem;color:var(--text-muted)">厂商已验证&#165;0</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════ 3. EDGE AI ═══════════════ -->
-<section class="section" id="edge">
-  <div class="section-header">
-    <div class="tag">&#9654; 点击展开</div>
-    <h2>边缘AI推理引擎</h2>
-    <p>全本地推理 · INT8量化 · &lt;1 TOPS · &lt;50ms</p>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-cyan">&#129504;</div>
-      <div class="ec-info">
-        <h3>ONNX Runtime + INT8量化</h3>
-        <div class="ec-brief">模型训练→ONNX导出→INT8量化→NPU部署全链路</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <p>模型从PyTorch导出为ONNX格式后，经过INT8对称量化校准部署到NPU加速后端。模型体积缩小4倍，推理速度提升2-4倍。</p>
-        <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr 1fr">
-          <div class="stat-box"><div class="s-num">FP32</div><div class="s-lbl">原始精度</div></div>
-          <div class="stat-box"><div class="s-num">&#8595;4&#215;</div><div class="s-lbl">模型压缩</div></div>
-          <div class="stat-box"><div class="s-num">2-4&#215;</div><div class="s-lbl">推理加速</div></div>
-          <div class="stat-box"><div class="s-num">&lt;2%</div><div class="s-lbl">精度损失</div></div>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-top:.5rem">
-          <span class="tag-chip tag-cyan">PyTorch &#8594; ONNX</span>
-          <span class="tag-chip tag-green">INT8对称量化</span>
-          <span class="tag-chip tag-purple">500段校准数据</span>
-          <span class="tag-chip tag-amber">逐通道量化</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-purple">&#128230;</div>
-      <div class="ec-info">
-        <h3>多模型调度与流水线</h3>
-        <div class="ec-brief">4模型共存 · 异步流水线 · &lt;100ms全链路</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <p>FallNet、VitalNet、BedNet、SleepNet四模型共存于同一边缘设备，INT8总大小 &lt;500KB。通过异步推理流水线实现雷达数据采集与模型推理并行执行。</p>
-        <div class="table-wrap">
-          <table class="mini-table"><tr><th>模型</th><th>大小</th><th>延迟</th><th>频率</th></tr>
-          <tr><td>VitalNet</td><td>~180KB</td><td>&lt;10ms</td><td>每秒1次</td></tr>
-          <tr><td>BedNet</td><td>~80KB</td><td>&lt;5ms</td><td>每帧</td></tr>
-          <tr><td>FallNet</td><td>~320KB</td><td>&lt;20ms</td><td>潜力窗口</td></tr>
-          <tr><td>SleepNet</td><td>~250KB</td><td>&lt;200ms</td><td>每8h</td></tr>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════ 4. AI MODELS ═══════════════ -->
-<section class="section" id="models" style="background:linear-gradient(180deg,transparent 0%,rgba(124,58,237,.015) 50%,transparent 100%)">
-  <div class="section-header">
-    <div class="tag">&#9654; 点击展开</div>
-    <h2>核心AI模型族</h2>
-    <p>四模型协同 · 全INT8量化 · 整包 &lt; 500KB</p>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-red">&#128680;</div>
-      <div class="ec-info">
-        <h3>FallNet · 跌倒检测 <span class="tag-chip tag-amber" style="vertical-align:middle">Phase 2</span></h3>
-        <div class="ec-brief">1D CNN + BiLSTM · 三层分级判定 · F1 0.951</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <div class="tabs">
-          <div class="tab-btn active" data-tab="fn-arch">模型架构</div>
-          <div class="tab-btn" data-tab="fn-feat">三阶段特征</div>
-          <div class="tab-btn" data-tab="fn-tier">三级判定</div>
-        </div>
-        <div id="fn-arch" class="tab-content active">
-          <p><strong>架构：</strong>1D CNN + BiLSTM 混合模型</p>
-          <p><strong>输入：</strong>雷达点云轨迹，2秒时间窗口（40帧）</p>
-          <p><strong>输出：</strong>跌倒概率 (0-1)</p>
-          <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr 1fr">
-            <div class="stat-box"><div class="s-num">96.8%</div><div class="s-lbl">召回率</div></div>
-            <div class="stat-box"><div class="s-num">93.5%</div><div class="s-lbl">精确率</div></div>
-            <div class="stat-box"><div class="s-num">0.951</div><div class="s-lbl">F1-Score</div></div>
-            <div class="stat-box"><div class="s-num">320KB</div><div class="s-lbl">INT8大小</div></div>
-          </div>
-        </div>
-        <div id="fn-feat" class="tab-content">
-          <p><strong>三类特征：</strong></p>
-          <div class="spec-row">
-            <div class="spec-item"><div class="s-label">&#127919; 运动学</div><div class="s-val" style="font-size:.72rem">V_z · a_z · 朝向角</div><div style="font-size:.6rem;color:var(--text-muted)">质心速度和加速度</div></div>
-            <div class="spec-item"><div class="s-label">&#128202; 形态学</div><div class="s-val" style="font-size:.72rem">点云分布范围</div><div style="font-size:.6rem;color:var(--text-muted)">身高→水平收缩</div></div>
-            <div class="spec-item"><div class="s-label">&#128200; 时序模式</div><div class="s-val" style="font-size:.72rem">Phase A/B/C</div><div style="font-size:.6rem;color:var(--text-muted)">失稳→撞击→静止</div></div>
-          </div>
-        </div>
-        <div id="fn-tier" class="tab-content">
-          <div style="display:flex;flex-direction:column;gap:.4rem">
-            <div class="spec-item" style="display:flex;justify-content:space-between;align-items:center"><div><span class="tag-chip tag-amber">Level 1</span> 运动预筛</div><div style="font-size:.7rem;color:var(--text-dim)">V_z > 0.8m/s? 每帧 · 过滤99%</div></div>
-            <div class="spec-item" style="display:flex;justify-content:space-between;align-items:center"><div><span class="tag-chip tag-cyan">Level 2</span> CNN分类</div><div style="font-size:.7rem;color:var(--text-dim)">1D CNN · P&#8320;.7 · 每0.5s</div></div>
-            <div class="spec-item" style="display:flex;justify-content:space-between;align-items:center"><div><span class="tag-chip tag-red">Level 3</span> LSTM验证</div><div style="font-size:.7rem;color:var(--text-dim)">BiLSTM · 三阶段连续? · 2s窗口</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-cyan">&#10084;&#65039;</div>
-      <div class="ec-info">
-        <h3>VitalNet · 呼吸心率估计</h3>
-        <div class="ec-brief">时序Transformer-tiny · 相位差分法 · MAPE&lt;5%</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <p>通过分析雷达I/Q帧序列中人体胸廓微动引起的相位变化，利用相位差分法提取微小心跳信号，使用时序Transformer-tiny模型估计呼吸频率和心率。</p>
-        <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
-          <div class="stat-box"><div class="s-num">&lt;5%</div><div class="s-lbl">MAPE误差</div></div>
-          <div class="stat-box"><div class="s-num">180KB</div><div class="s-lbl">模型大小</div></div>
-          <div class="stat-box"><div class="s-num">1s</div><div class="s-lbl">分析窗口</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-green">&#128715;</div>
-      <div class="ec-info">
-        <h3>BedNet · 在床/离床分类</h3>
-        <div class="ec-brief">MobileNetV1-1D · 单帧判定 · &gt;99%准确率</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <p>基于单帧range profile即可准确判断在床/离床状态。超低功耗设计（模型仅80KB），用于触发跌倒检测增强模式——离床后自动增强跌倒检测灵敏度。</p>
-        <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
-          <div class="stat-box"><div class="s-num">&gt;99%</div><div class="s-lbl">准确率</div></div>
-          <div class="stat-box"><div class="s-num">80KB</div><div class="s-lbl">模型大小</div></div>
-          <div class="stat-box"><div class="s-num">&lt;5ms</div><div class="s-lbl">推理延迟</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-purple">&#127769;</div>
-      <div class="ec-info">
-        <h3>SleepNet · 睡眠分期</h3>
-        <div class="ec-brief">TCN时序卷积 · 深睡/浅睡/REM/清醒四期 · &#954;&gt;0.6</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <p>基于TCN（时序卷积网络）的睡眠分期模型，通过分析整夜（8小时）呼吸+体动时序信号，将睡眠分为深睡、浅睡、REM、清醒四期。</p>
-        <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
-          <div class="stat-box"><div class="s-num">&#954;>0.6</div><div class="s-lbl">Cohen一致性</div></div>
-          <div class="stat-box"><div class="s-num">250KB</div><div class="s-lbl">模型大小</div></div>
-          <div class="stat-box"><div class="s-num">8h</div><div class="s-lbl">分析窗口</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════ 5. DATA STRATEGY ═══════════════ -->
-<section class="section" id="data">
-  <div class="section-header">
-    <div class="tag">&#9654; 点击展开</div>
-    <h2>三阶段数据策略</h2>
-    <p>从合成数据到真实环境，逐步攻克跌倒检测数据稀缺难题</p>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-amber">&#128202;</div>
-      <div class="ec-info">
-        <h3>Phase 1 · 合成数据 <span style="font-size:.65rem;color:var(--text-muted);font-family:var(--font-mono)">Month 1-2</span></h3>
-        <div class="ec-brief">Unity + TI mmWave Studio · 10,000+样本 · 零成本</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <p>使用Unity构建虚拟养老院房间模型，结合TI mmWave Studio官方雷达模拟器，生成50种跌倒姿态×10个方向×3种速度的模拟雷达数据。用于FallNet的模型预训练。</p>
-        <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
-          <div class="stat-box"><div class="s-num">10,000+</div><div class="s-lbl">合成样本</div></div>
-          <div class="stat-box"><div class="s-num">50</div><div class="s-lbl">跌倒姿态</div></div>
-          <div class="stat-box"><div class="s-num">&#165;0</div><div class="s-lbl">成本</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-cyan">&#128300;</div>
-      <div class="ec-info">
-        <h3>Phase 2 · 实验室采集 <span style="font-size:.65rem;color:var(--text-muted);font-family:var(--font-mono)">Month 2-4</span></h3>
-        <div class="ec-brief">15名志愿者 · 200种动作 · 15,000+标注样本</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <p>招募15名志愿者（年龄25-65岁，BMI 18-30），在模拟养老院房间中执行200种动作（100种跌倒+100种日常动作），每种重复5次。同步录像标注。</p>
-        <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
-          <div class="stat-box"><div class="s-num">15,000+</div><div class="s-lbl">标注样本</div></div>
-          <div class="stat-box"><div class="s-num">200</div><div class="s-lbl">动作类型</div></div>
-          <div class="stat-box"><div class="s-num">&#165;5万</div><div class="s-lbl">成本</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-green">&#127963;</div>
-      <div class="ec-info">
-        <h3>Phase 3 · 真实环境 <span style="font-size:.65rem;color:var(--text-muted);font-family:var(--font-mono)">Month 3-6</span></h3>
-        <div class="ec-brief">3家养老院 · 60台设备 · 50,000+小时数据</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <p>在3家合作养老院部署60台预研设备，通过半监督学习处理无标注数据。护工标注关键事件（跌倒、离床、异常等），持续6个月收集真实环境数据用于模型迭代。</p>
-        <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
-          <div class="stat-box"><div class="s-num">50,000+h</div><div class="s-lbl">真实数据</div></div>
-          <div class="stat-box"><div class="s-num">60台</div><div class="s-lbl">预研设备</div></div>
-          <div class="stat-box"><div class="s-num">&#165;10万</div><div class="s-lbl">成本</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-pink">&#128200;</div>
-      <div class="ec-info">
-        <h3>模型精度演进路线</h3>
-        <div class="ec-brief">F1: 0.70 → 0.85 → 0.92 → &gt;0.95 · 持续OTA迭代</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.6rem;">
-          <div class="stat-box"><div class="s-num">0.70</div><div class="s-lbl">Month 2 合成</div><div style="height:4px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:.3rem;overflow:hidden"><div style="height:100%;width:70%;background:linear-gradient(90deg,var(--amber),var(--cyan));border-radius:2px"></div></div></div>
-          <div class="stat-box"><div class="s-num">0.85</div><div class="s-lbl">Month 4 实验室</div><div style="height:4px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:.3rem;overflow:hidden"><div style="height:100%;width:85%;background:linear-gradient(90deg,var(--cyan),var(--blue));border-radius:2px"></div></div></div>
-          <div class="stat-box"><div class="s-num">0.92</div><div class="s-lbl">Month 6 真实</div><div style="height:4px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:.3rem;overflow:hidden"><div style="height:100%;width:92%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:2px"></div></div></div>
-          <div class="stat-box"><div class="s-num">0.95+</div><div class="s-lbl">Month 9+ OTA</div><div style="height:4px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:.3rem;overflow:hidden"><div style="height:100%;width:96%;background:linear-gradient(90deg,var(--cyan),var(--blue));border-radius:2px"></div></div></div>
-        </div>
-        <p style="margin-top:.8rem"><strong>冷启动策略：</strong>先上线BedNet（在床/离床）+ VitalNet（呼吸心率），无需跌倒数据。FallNet跌倒检测在实验室数据验证通过后上线（Month 4+）。每2周迭代一次模型通过OTA推送到设备。</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="exp-card">
-    <div class="exp-card-header" data-card="toggle">
-      <div class="ec-icon icon-green">&#128200;</div>
-      <div class="ec-info">
-        <h3>性能对比 · 本方案 vs 现有技术</h3>
-        <div class="ec-brief">召回率96.8% · 误报率0.8次/天/20台 · 隐私零侵犯</div>
-      </div>
-      <div class="ec-arrow">&#9660;</div>
-    </div>
-    <div class="exp-card-body">
-      <div class="exp-card-body-inner">
-        <div class="table-wrap">
-          <table class="mini-table"><tr><th>指标</th><th style="color:var(--cyan)">&#11088; EldCare</th><th>24GHz雷达</th><th>加速度计</th><th>摄像头AI</th></tr>
-          <tr><td>召回率</td><td class="hl">96.8%</td><td>82.3%</td><td>89.1%</td><td>97.2%</td></tr>
-          <tr><td>精确率</td><td class="hl">93.5%</td><td>61.7%</td><td>72.4%</td><td>95.1%</td></tr>
-          <tr><td>F1-Score</td><td class="hl">0.951</td><td>0.704</td><td>0.799</td><td>0.961</td></tr>
-          <tr><td>误报(天/20台)</td><td class="hl">0.8</td><td>5.2</td><td>3.8</td><td>1.2</td></tr>
-          <tr><td>延迟</td><td class="hl">&lt;2s</td><td>&lt;1s</td><td>&lt;1s</td><td>&lt;3s</td></tr>
-          <tr><td>隐私</td><td class="hl">&#9989; 无</td><td>&#9989; 无</td><td>&#9989; 无</td><td>&#10060; 严重</td></tr>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<footer class="footer">
-  <p>EldCare &#183; 银发守护者 &#183; <a href="https://frankhe303.github.io/eldcare-tech/">交互式技术白皮书</a></p>
-  <p style="margin-top:.3rem">基于 Rockchip NPU &#183; ONNX Runtime &#183; 60GHz毫米波雷达</p>
-  <p style="margin-top:.3rem;font-size:.65rem;color:var(--text-muted)">&copy; 2025 EldCare &#183; 点击卡片展开技术细节</p>
+<footer class="foot">
+  <p>EldCare &#183; 银发守护者 &#183; <a href="https://frankhe303.github.io/eldcare-tech/" style="color:var(--cyand);text-decoration:none">技术白皮书</a></p>
+  <p style="margin-top:.3rem;font-size:.65rem">&copy; 2025 EldCare</p>
 </footer>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // --- Card toggle ---
-  document.querySelectorAll('[data-card="toggle"]').forEach(function(header) {
-    header.addEventListener('click', function(e) {
-      var card = this.closest('.exp-card');
-      var wasOpen = card.classList.contains('open');
-      document.querySelectorAll('.exp-card.open').forEach(function(c) { c.classList.remove('open'); });
-      if (!wasOpen) card.classList.add('open');
-    });
-  });
-
-  // --- Tab switching ---
-  document.querySelectorAll('[data-tab]').forEach(function(btn) {
-    btn.addEventListener('click', function(e) {
-      var tabId = this.getAttribute('data-tab');
-      var container = this.parentElement;
-      container.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-      container.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
-      this.classList.add('active');
-      var target = document.getElementById(tabId);
-      if (target) target.classList.add('active');
-    });
-  });
-
-  // --- Nav highlight ---
-  var sections = document.querySelectorAll('.section');
-  var navLinks = document.querySelectorAll('.nav-links a');
-  window.addEventListener('scroll', function() {
-    var current = '';
-    sections.forEach(function(s) { if (window.scrollY >= s.offsetTop - 250) current = s.id; });
-    navLinks.forEach(function(l) {
-      l.style.background = l.getAttribute('href') === '#' + current ? 'rgba(0,212,255,0.1)' : 'transparent';
-    });
-  });
-});
-</script>
 </body>
 </html>
